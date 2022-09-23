@@ -1,8 +1,15 @@
 package com.itheima.reggie;
 
+import com.itheima.reggie.common.R;
+import com.itheima.reggie.entity.Employee;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.util.DigestUtils;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+
+import javax.servlet.http.HttpServletRequest;
 
 @Slf4j
 @SpringBootApplication
