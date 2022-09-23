@@ -1,17 +1,16 @@
 package com.itheima.config;
 
+import com.itheima.common.JacksonObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport;
 
+import java.util.List;
 
-/**
- * mvc相关的配置类
- *
- * @author t3rik
- * @since 2022/9/23 14:57
- */
+
 @Slf4j
 @Configuration
 public class WebMvcConfig extends WebMvcConfigurationSupport {
@@ -25,5 +24,14 @@ public class WebMvcConfig extends WebMvcConfigurationSupport {
         registry.addResourceHandler("/backend/**").addResourceLocations("classpath:/backend/");
         registry.addResourceHandler("/front/**").addResourceLocations("classpath:/front/");
         log.info("静态资源映射成功");
+    }
+
+    @Override
+    protected void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
+        //自定义一个转换器
+        MappingJackson2HttpMessageConverter messageConverter = new MappingJackson2HttpMessageConverter();
+        messageConverter.setObjectMapper(new JacksonObjectMapper());
+        //加入到转换器中
+        converters.add(0,messageConverter);
     }
 }
