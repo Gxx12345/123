@@ -1,0 +1,25 @@
+server:
+  port: 8999
+spring:
+  application:
+    name: reggie_take_out
+  datasource:
+    druid:
+    # 应为连接池用的德鲁伊 ,所以这个地址就加cj
+      driver-class-name: com.mysql.cj.jdbc.Driver
+      #数据库连接地址  localhost=127.0.0.1 本机
+      url: jdbc:mysql://localhost:3306/reggie?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowPublicKeyRetrieval=true
+      username: root
+      password: 1234
+mybatis-plus:
+  configuration:
+    #在映射实体或者属性时，将数据库中表名和字段名中的下划线去掉，按照驼峰命名法映射
+   # 开启驼峰: id_no -> idNO
+    map-underscore-to-camel-case: true
+    # 日志输出
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    #全员配置
+  global-config:
+    db-config:
+      # id的生成规则
+      id-type: ASSIGN_ID
