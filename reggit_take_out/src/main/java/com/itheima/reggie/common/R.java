@@ -1,6 +1,13 @@
 package com.itheima.reggie.common;
 
+import com.itheima.reggie.entity.Employee;
 import lombok.Data;
+import org.springframework.util.DigestUtils;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+
+import javax.servlet.http.HttpServletRequest;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
