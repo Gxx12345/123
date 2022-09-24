@@ -1,7 +1,7 @@
 package com.alibaba.reggie.controller;
 
 import com.alibaba.reggie.entity.Employee;
-import com.alibaba.reggie.entity.Result;
+import com.alibaba.reggie.common.Result;
 import com.alibaba.reggie.service.IEmployeeService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
