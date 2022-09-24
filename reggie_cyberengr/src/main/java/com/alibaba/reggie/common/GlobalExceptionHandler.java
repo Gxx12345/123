@@ -20,12 +20,19 @@ import java.sql.SQLIntegrityConstraintViolationException;
 @ControllerAdvice(annotations = {RestController.class, Controller.class})
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(SQLIntegrityConstraintViolationException.class)
-    public Result<String> exception(SQLIntegrityConstraintViolationException e) {
-        log.error(e.getMessage());
-        if (e.getMessage().contains("Duplicate entry")) {
-            String[] split = e.getMessage().split(" ");
-            return Result.error(split[2]+"已存在");
+    /**
+     * 添加新员工是时返回用户已存在异常
+     * @param e
+     * @return
+     */
+    @ExceptionHandler(Exception.class)
+    public Result<String> exception(Exception e) {
+        log.error("e==>{}",e.getMessage());
+        if(e instanceof SQLIntegrityConstraintViolationException) {
+            if (e.getMessage().contains("Duplicate entry")) {
+                String[] split = e.getMessage().split(" ");
+                return Result.error("用户"+split[2]+"已存在");
+            }
         }
         return Result.error("未知错误!");
     }
