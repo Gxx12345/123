@@ -8,7 +8,7 @@ package com.alibaba.reggie.common;
  */
 public interface GlobalConstant {
     /**
-     * 定义用户的employee的session值
+     * 定义当前登录用户employee的key值
      */
     String EMPLOYEE_KEY = "employee";
 }

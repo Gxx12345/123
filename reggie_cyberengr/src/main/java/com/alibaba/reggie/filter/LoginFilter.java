@@ -26,7 +26,9 @@ public class LoginFilter implements Filter {
         String requestURI = request.getRequestURI();
         log.info("拦截到请求"+requestURI);
         //定义不用拦截的路径,进行判断
-        String[] uris = {"/backend/**", "/front/**", "/employee/login", "/employee/logout"};
+        String[] uris = {
+                "/backend/**", "/front/**",
+                "/employee/login", "/employee/logout"};
         for (String uri : uris) {
             //AntPathMatcher路径匹配器对象的match方法比较路径
             if (MATCHER.match(uri,requestURI)) {
