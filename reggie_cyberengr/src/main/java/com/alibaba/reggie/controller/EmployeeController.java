@@ -117,4 +117,14 @@ public class EmployeeController {
         service.updateById(employeeParam);
         return Result.success("状态更新成功");
     }
+
+    @GetMapping("/{id}")
+    public Result<Employee> selectById(@PathVariable Long id) {
+        Employee employee = service.getById(id);
+        if (null != employee) {
+            return Result.success(employee);
+        }
+        return Result.error("输入参数有误!");
+    }
+
 }
