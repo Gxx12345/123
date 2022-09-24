@@ -28,8 +28,8 @@ public class EmployeeController {
 
     /**
      * 员工登录
-     * @param request
-     * @param employeeParam
+     * @param request Servlet 请求
+     * @param employeeParam 前端传来的对象
      * @return
      */
     @PostMapping("/login")
@@ -67,7 +67,7 @@ public class EmployeeController {
 
     /**
      * 员工退出
-     * @param request
+     * @param request Servlet 请求
      * @return
      */
     @PostMapping("/logout")
@@ -80,8 +80,8 @@ public class EmployeeController {
 
     /**
      * 添加员工
-     * @param employeeParam
-     * @param request
+     * @param employeeParam 前端传来的对象
+     * @param request Servlet 请求
      * @return
      */
     @PostMapping
@@ -123,7 +123,7 @@ public class EmployeeController {
     @GetMapping("/page")
     public R<Page<Employee>> page(int page,int pageSize,String name) {
         //构造分页构造器
-        Page<Employee> pageInfo = new Page<>();
+        Page<Employee> pageInfo = new Page<>(page,pageSize);
 
         //构造条件构造器
         LambdaQueryWrapper<Employee> queryWrapper = new LambdaQueryWrapper<>();
@@ -142,8 +142,8 @@ public class EmployeeController {
 
     /**
      * 根据id修改员工信息
-     * @param employeeParam
-     * @param request
+     * @param employeeParam 前端传来的对象
+     * @param request Servlet 请求
      * @return
      */
     @PutMapping
@@ -168,7 +168,7 @@ public class EmployeeController {
 
     /**
      * 根据id查询员工信息 并进行回显
-     * @param id
+     * @param id 前端传来的id
      * @return
      */
     @GetMapping("/{id}")
@@ -177,6 +177,9 @@ public class EmployeeController {
             return R.error("传入的参数有误");
         }
         Employee byId = iEmployeeService.getById(id);
+        if (byId == null) {
+            return R.error("传入的参数有误");
+        }
         return R.success(byId);
     }
 
