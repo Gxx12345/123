@@ -109,4 +109,12 @@ public class EmployeeController {
         return Result.success(employeePage);
     }
 
+    @PutMapping
+    public Result<String> updateStatus(@RequestBody Employee employeeParam,HttpServletRequest request) {
+        employeeParam.setUpdateTime(LocalDateTime.now());
+        Long id = (Long) request.getSession().getAttribute(GlobalConstant.EMPLOYEE_KEY);
+        employeeParam.setUpdateUser(id);
+        service.updateById(employeeParam);
+        return Result.success("状态更新成功");
+    }
 }
