@@ -31,8 +31,15 @@ public class EmployeeController {
      */
     @PostMapping("/login")
     public R<Employee> login(HttpServletRequest request, @RequestBody Employee employeeParam) {
-        //前后端联通
+        // 前后端联通
+        // 前端传入的一切参数都是不可信的.
         log.info("employee ==> {}", employeeParam.toString());
+        // 用户名和密码这两个参数,是必须要有的.
+        // 没有这两个参数,我们这整个的登录接口都没有意义
+        if (org.apache.commons.lang.StringUtils.isBlank(employeeParam.getUsername()) ||
+                org.apache.commons.lang.StringUtils.isBlank(employeeParam.getPassword())) {
+            return R.error("登录失败");
+        }
         //用户名
         String username = employeeParam.getUsername();
         //1、根据页面提交的用户名username查询数据库
