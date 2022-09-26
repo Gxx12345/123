@@ -101,8 +101,9 @@ public class EmployeeController {
         String initPassword = DigestUtils.md5DigestAsHex("123456".getBytes());
         // 赋值初始密码
         employeeParam.setPassword(initPassword);
+        //region 更新时间
         // 3.设置创建和更新时间
-        LocalDateTime now = LocalDateTime.now();
+        /*LocalDateTime now = LocalDateTime.now();
         // 创建时间
         employeeParam.setCreateTime(now);
         // 修改时间
@@ -114,7 +115,8 @@ public class EmployeeController {
         // 创建人
         employeeParam.setCreateUser(empId);
         // 修改人
-        employeeParam.setUpdateUser(empId);
+        employeeParam.setUpdateUser(empId);*/
+        //endregion
 
         // 5.完成保存业务
         EmployeeService.save(employeeParam);

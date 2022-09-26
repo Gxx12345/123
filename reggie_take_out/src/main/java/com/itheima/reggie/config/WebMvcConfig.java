@@ -15,9 +15,14 @@ import java.util.List;
 public class WebMvcConfig extends WebMvcConfigurationSupport {
     @Override
     protected void addResourceHandlers(ResourceHandlerRegistry registry) {
+        /**
+         * 资源映射
+         * @param registry
+         */
         log.info("开始进行静态资源映射...");
         registry.addResourceHandler("/backend/**").addResourceLocations("classpath:/backend/");
         registry.addResourceHandler("/front/**").addResourceLocations("classpath:/front/");
+        log.info("资源映射成功");
     }
 
     /**

@@ -1,0 +1,118 @@
+package com.itheima.reggie.controller;
+
+
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.StringUtils;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.itheima.reggie.common.GlobalConstant;
+import com.itheima.reggie.common.R;
+import com.itheima.reggie.entity.Category;
+import com.itheima.reggie.service.CategoryService;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
+/**
+ * 控制层：分类管理
+ *
+ * @author Gmy
+ * @since 2022/9/26 12:04
+ */
+@Slf4j
+@RestController
+@RequestMapping("/category")
+public class CategoryController {
+
+    @Autowired
+    private CategoryService categoryService;
+
+    /**
+     * 新增分类
+     *
+     * @param categoryParam
+     * @return
+     */
+    @PostMapping
+    public R<String> save(@RequestBody Category categoryParam) {
+        log.info("categoryParam ===> {}", categoryParam.toString());
+
+        // 分类名称校验
+        // 分类的名称
+        if (StringUtils.isBlank(categoryParam.getName())) {
+            return R.error(GlobalConstant.FAILED);
+        }
+
+        //  排序的校验
+        if (categoryParam.getSort() == null) {
+            return R.error(GlobalConstant.FAILED);
+        }
+
+        //  分类类型
+        if (categoryParam.getType() == null) {
+            return R.error(GlobalConstant.FAILED);
+        }
+
+        // 把前端传入的数据,保存到数据库中
+        // controller -> 调用service->调用mapper
+        // 创建时间
+        // 修改时间
+        // 因为自动填充
+        // 如果保存成功,会返回true
+        // 如果保存失败,会返回false
+        boolean isFinish = categoryService.save(categoryParam);
+
+        return isFinish ? R.success(GlobalConstant.FINISH) : R.error(GlobalConstant.FAILED);
+    }
+
+    /**
+     * 分页查询
+     */
+    @GetMapping("page")
+    public R<Page<Category>> page(Integer page, Integer pageSize) {
+        //  使用mp来实现分页查询
+        //  分页对象
+        Page<Category> queryPage = new Page<>();
+        //  当前页
+        queryPage.setCurrent(page);
+        //  当前页要显示多少行
+        queryPage.setSize(pageSize);
+
+        //  排序字段
+        //  使用mp的话条件都是wrapper中的
+        LambdaQueryWrapper<Category> queryWrapper = new LambdaQueryWrapper<>();
+        //  调用sort字段进行升序
+        queryWrapper.orderByDesc(Category::getSort);
+        //  调用service中的分页方法，来查询分类的分页数据
+        Page<Category> result = this.categoryService.page(queryPage, queryWrapper);
+        //  调用page方法时，可以使用查询的分页对象
+        //  也可以新建一个对象，来接收这个返回的结果集
+        //this.categoryService.page(queryPage, queryWrapper);
+        return R.success(result);
+    }
+
+    /**
+     * 根据id删除分类
+     *
+     * @param id
+     * @return
+     */
+    @DeleteMapping
+    public R<String> delete(Long id) {
+        log.info("id ===> {}", id);
+        //  根据主键id删除数据
+        //  mp提供的
+        //  我们调用的是我们自定义的删除方法
+        categoryService.deleteById(id);
+        return R.success(GlobalConstant.FINISH);
+    }
+
+    /**
+     * 修改分类
+     */
+    @PutMapping
+    public R<String> update(@RequestBody Category category) {
+        //  调用service中的update方法
+        categoryService.updateById(category);
+        return R.success(GlobalConstant.FINISH);
+    }
+}
