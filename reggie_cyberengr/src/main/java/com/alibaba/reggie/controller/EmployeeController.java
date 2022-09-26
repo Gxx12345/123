@@ -74,13 +74,15 @@ public class EmployeeController {
     public Result<String> addEmployee(@RequestBody Employee employeeParam,HttpServletRequest request) {
         employeeParam.setPassword(DigestUtils.md5DigestAsHex("123456".getBytes()));
         employeeParam.setStatus((short) 1);
-        LocalDateTime now = LocalDateTime.now();
+        //region 公共字段填充
+        /*LocalDateTime now = LocalDateTime.now();
         employeeParam.setCreateTime(now);
         employeeParam.setUpdateTime(now);
 
         Long employeeId = (Long) request.getSession().getAttribute(GlobalConstant.EMPLOYEE_KEY);
         employeeParam.setCreateUser(employeeId);
-        employeeParam.setUpdateUser(employeeId);
+        employeeParam.setUpdateUser(employeeId);*/
+        //endregion
         service.save(employeeParam);
         return Result.success("添加成功!");
     }
@@ -111,9 +113,11 @@ public class EmployeeController {
 
     @PutMapping
     public Result<String> updateStatus(@RequestBody Employee employeeParam,HttpServletRequest request) {
-        employeeParam.setUpdateTime(LocalDateTime.now());
+        //region 公共字段填充
+        /*employeeParam.setUpdateTime(LocalDateTime.now());
         Long id = (Long) request.getSession().getAttribute(GlobalConstant.EMPLOYEE_KEY);
-        employeeParam.setUpdateUser(id);
+        employeeParam.setUpdateUser(id);*/
+        //endregion
         service.updateById(employeeParam);
         return Result.success("状态更新成功");
     }

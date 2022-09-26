@@ -1,6 +1,7 @@
 package com.alibaba.reggie.filter;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.reggie.common.BaseContext;
 import com.alibaba.reggie.common.GlobalConstant;
 import com.alibaba.reggie.common.Result;
 import lombok.extern.slf4j.Slf4j;
@@ -38,6 +39,8 @@ public class LoginFilter implements Filter {
         }
         //根据session值取得employeeId,判断id是否为null
         Long employeeId = (Long) request.getSession().getAttribute(GlobalConstant.EMPLOYEE_KEY);
+        //存放当前登录用户到ThreadLocal
+        BaseContext.setSetThreadLocalCurrentId(employeeId);
         if (null != employeeId) {
             filterChain.doFilter(servletRequest, servletResponse);
             return;

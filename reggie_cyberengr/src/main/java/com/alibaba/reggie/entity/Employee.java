@@ -1,5 +1,6 @@
 package com.alibaba.reggie.entity;
 
+import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
@@ -21,8 +22,12 @@ public class Employee implements Serializable {
     private String sex;
     private String idNumber;
     private Short status;
+    @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createTime;
+    @TableField(fill = FieldFill.INSERT_UPDATE)
     private LocalDateTime updateTime;
+    @TableField(fill = FieldFill.INSERT)
     private Long createUser;
+    @TableField(fill = FieldFill.INSERT_UPDATE)
     private Long updateUser;
 }
