@@ -1,4 +1,4 @@
-package com.itheima.reggie.config;
+package com.itheima.reggie.common;
 
 /**
  * 对象转换器
