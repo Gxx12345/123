@@ -24,6 +24,7 @@ public class CategoryController {
 
     /**
      * 新增分类
+     *
      * @param category
      * @return
      */
@@ -38,18 +39,19 @@ public class CategoryController {
 
     /**
      * 分页查询
+     *
      * @param page
      * @param pageSize
      * @return
      */
     @GetMapping("/page")
-    public Result<Page<Category>> pageResult(Integer page,Integer pageSize) {
+    public Result<Page<Category>> pageResult(Integer page, Integer pageSize) {
         Page<Category> categoryPage = new Page<>();
         categoryPage.setCurrent(page);
         categoryPage.setSize(pageSize);
         LambdaQueryWrapper<Category> wrapper = new LambdaQueryWrapper();
         wrapper.orderByAsc(Category::getSort);
-        service.page(categoryPage,wrapper);
+        service.page(categoryPage, wrapper);
         return Result.success(categoryPage);
     }
 
@@ -57,5 +59,14 @@ public class CategoryController {
     public Result<String> delete(Long id) {
         service.remove(id);
         return Result.success(GlobalConstant.FINISHED);
+    }
+
+    @PutMapping
+    public Result<String> update(@RequestBody Category category) {
+        if (service.getById(category) != null) {
+            boolean update = service.updateById(category);
+            return update ? Result.success(GlobalConstant.FINISHED) : Result.error(GlobalConstant.FAILED);
+        }
+        return Result.error(GlobalConstant.FAILED);
     }
 }

@@ -36,7 +36,8 @@ public class MyMetaObjectHandler implements MetaObjectHandler {
      */
     @Override
     public void updateFill(MetaObject metaObject) {
-        metaObject.setValue("createUser",BaseContext.getSetThreadLocalCurrentId());
+        LocalDateTime now = LocalDateTime.now();
+        metaObject.setValue("updateTime",now);
         metaObject.setValue("updateUser",BaseContext.getSetThreadLocalCurrentId());
     }
 }
