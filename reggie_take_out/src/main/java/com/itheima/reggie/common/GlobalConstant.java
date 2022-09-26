@@ -9,4 +9,14 @@ package com.itheima.reggie.common;
 public class GlobalConstant {
     //获取登录用户在Session中的key
     public static final String EMPLOYEE_KEY = "employee";
+
+    /**
+     * 操作成功
+     */
+    public static final String FINISH = "操作成功";
+
+    /**
+     * 操作失败
+     */
+    public static final String FAILED = "操作失败";
 }

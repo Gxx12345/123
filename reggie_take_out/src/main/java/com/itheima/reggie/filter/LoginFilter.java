@@ -1,6 +1,7 @@
 package com.itheima.reggie.filter;
 
 import com.alibaba.fastjson.JSON;
+import com.itheima.reggie.common.BaseContext;
 import com.itheima.reggie.common.GlobalConstant;
 import com.itheima.reggie.common.R;
 import org.springframework.util.AntPathMatcher;
@@ -45,14 +46,17 @@ public class LoginFilter implements Filter {
             }
         }
 
-        //获取到Session对象
-        Long session = (Long) request.getSession().getAttribute(GlobalConstant.EMPLOYEE_KEY);
+        //获取到当前登录对象ID
+        Long ID = (Long) request.getSession().getAttribute(GlobalConstant.EMPLOYEE_KEY);
         //判断Session对象是否为null
-        if (session != null) {
+        if (ID != null) {
+            // 获取到当前登陆对象ID并传入ThreadLocal包装类中以便使用
+            BaseContext.setCurrentUserId(ID);
             //不为null直接放行
             filterChain.doFilter(request, response);
             return;
         }
+
 
         //Session为null，返回前端数据，该用户未登录
         String notLogin = JSON.toJSONString(R.error("NOTLOGIN"));
