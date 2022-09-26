@@ -17,6 +17,10 @@ import java.time.LocalDateTime;
 @Component
 public class MyMetaObjectHandler implements MetaObjectHandler {
 
+    /**
+     * 设置公共字段createTime updateTime createUser updateUser
+     * @param metaObject
+     */
     @Override
     public void insertFill(MetaObject metaObject) {
         LocalDateTime now = LocalDateTime.now();
@@ -26,6 +30,10 @@ public class MyMetaObjectHandler implements MetaObjectHandler {
         metaObject.setValue("updateUser",BaseContext.getSetThreadLocalCurrentId());
     }
 
+    /**
+     * 设置公共字段createUser updateUser
+     * @param metaObject
+     */
     @Override
     public void updateFill(MetaObject metaObject) {
         metaObject.setValue("createUser",BaseContext.getSetThreadLocalCurrentId());

@@ -32,6 +32,8 @@ public class EmployeeController {
         if (StringUtils.isBlank(employeeParam.getUsername()) || StringUtils.isBlank(employeeParam.getPassword())) {
             return Result.error("登录失败!");
         }
+        //姓名去除前后空格
+        employeeParam.setUsername(employeeParam.getUsername().trim());
         //根据username查询用户信息
         LambdaQueryWrapper<Employee> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(Employee::getUsername, employeeParam.getUsername());
