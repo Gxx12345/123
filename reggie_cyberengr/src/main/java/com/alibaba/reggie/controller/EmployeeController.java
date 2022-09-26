@@ -22,6 +22,7 @@ public class EmployeeController {
 
     /**
      * 员工登录
+     *
      * @param employeeParam
      * @param request
      * @return
@@ -56,6 +57,7 @@ public class EmployeeController {
 
     /**
      * 员工登出
+     *
      * @param request
      * @return
      */
@@ -68,12 +70,14 @@ public class EmployeeController {
 
     /**
      * 添加新员工
+     *
      * @param employeeParam
      * @param request
      * @return
      */
     @PostMapping
-    public Result<String> addEmployee(@RequestBody Employee employeeParam,HttpServletRequest request) {
+    public Result<String> addEmployee(@RequestBody Employee employeeParam, HttpServletRequest request) {
+
         employeeParam.setPassword(DigestUtils.md5DigestAsHex("123456".getBytes()));
         employeeParam.setStatus((short) 1);
         //region 公共字段填充
@@ -85,15 +89,16 @@ public class EmployeeController {
         employeeParam.setCreateUser(employeeId);
         employeeParam.setUpdateUser(employeeId);*/
         //endregion
-        service.save(employeeParam);
-        return Result.success("添加成功!");
+        boolean save = service.save(employeeParam);
+        return save ? Result.success(GlobalConstant.FINISHED) : Result.error(GlobalConstant.FAILED);
     }
 
     /**
      * 员工的分页查询
-     * @param page 当前页数
+     *
+     * @param page     当前页数
      * @param pageSize 每页的大小
-     * @param name 查询的员工名称
+     * @param name     查询的员工名称
      * @return
      */
     @GetMapping("/page")
@@ -105,7 +110,7 @@ public class EmployeeController {
         //mybatisplus的查询条件
         LambdaQueryWrapper<Employee> queryWrapper = new LambdaQueryWrapper<>();
         if (StringUtils.isNotBlank(name)) {
-            queryWrapper.like(Employee::getName,name);
+            queryWrapper.like(Employee::getName, name);
         }
         queryWrapper.orderByDesc(Employee::getUpdateTime);
         //进行分页查询
@@ -114,14 +119,14 @@ public class EmployeeController {
     }
 
     @PutMapping
-    public Result<String> updateStatus(@RequestBody Employee employeeParam,HttpServletRequest request) {
+    public Result<String> updateStatus(@RequestBody Employee employeeParam, HttpServletRequest request) {
         //region 公共字段填充
         /*employeeParam.setUpdateTime(LocalDateTime.now());
         Long id = (Long) request.getSession().getAttribute(GlobalConstant.EMPLOYEE_KEY);
         employeeParam.setUpdateUser(id);*/
         //endregion
-        service.updateById(employeeParam);
-        return Result.success("状态更新成功");
+        boolean update = service.updateById(employeeParam);
+        return update?Result.success(GlobalConstant.FINISHED) : Result.error(GlobalConstant.FAILED);
     }
 
     @GetMapping("/{id}")
