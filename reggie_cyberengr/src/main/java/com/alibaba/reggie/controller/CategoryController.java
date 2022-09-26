@@ -22,6 +22,11 @@ public class CategoryController {
     @Autowired
     private ICategoryService service;
 
+    /**
+     * 新增分类
+     * @param category
+     * @return
+     */
     @PostMapping
     public Result<String> addCategory(@RequestBody Category category) {
         if (StringUtils.isBlank(category.getName()) || category.getType() == null || category.getSort() == null) {
@@ -46,5 +51,11 @@ public class CategoryController {
         wrapper.orderByAsc(Category::getSort);
         service.page(categoryPage,wrapper);
         return Result.success(categoryPage);
+    }
+
+    @DeleteMapping
+    public Result<String> delete(Long id) {
+        service.remove(id);
+        return Result.success(GlobalConstant.FINISHED);
     }
 }

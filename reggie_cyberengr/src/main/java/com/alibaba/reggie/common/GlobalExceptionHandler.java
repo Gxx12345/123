@@ -1,5 +1,6 @@
 package com.alibaba.reggie.common;
 
+import com.alibaba.reggie.exception.CustomException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -33,6 +34,9 @@ public class GlobalExceptionHandler {
                 String[] split = e.getMessage().split(" ");
                 return Result.error("用户"+split[2]+"已存在");
             }
+        }
+        if(e instanceof CustomException) {
+            return Result.error(e.getMessage());
         }
         return Result.error("未知错误!");
     }
