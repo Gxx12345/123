@@ -29,18 +29,21 @@ public class RujiConfig extends WebMvcConfigurationSupport {
     }
 
     /**
-     * 扩展mvc框架的消息转换器
+     * 扩展mvc框架的消息转换器  //  定义完了转换器还得要配置他, 所以下面就是配置 重写extendMessageConverters方法
      * @param converters
      */
     @Override
     protected void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
         log.info("扩展消息转换器...");
-        //创建消息转换器对象
+        //定义一个转换器
         MappingJackson2HttpMessageConverter messageConverter = new MappingJackson2HttpMessageConverter();
         //设置对象转换器，底层使用Jackson将Java对象转为json
-
         messageConverter.setObjectMapper(new JacksonObjectMapper());
-        //将上面的消息转换器对象追加到mvc框架的转换器集合中
+
+        //上面定义的转换器意思就是配置用JacksonObjectMapper里面序列号的格式
+        //完了配置完了转换器,spring还不能用,所以要把他加到spring集合中
+
+        //加入到转换器集合中
         converters.add(0,messageConverter);
     }
 }

@@ -22,6 +22,7 @@ import java.time.LocalDateTime;
 @Slf4j
 @RestController
 @RequestMapping("/employee")
+
 public class EmployeeController {
 
     @Autowired
@@ -92,8 +93,10 @@ public class EmployeeController {
     public R<String>save(@RequestBody Employee employeeParam, HttpServletRequest request){
         //前后端调练
         log.info("新增员工，员工信息：{}",employeeParam.toString());
+        log.info("controller当前线程的id:{}",Thread.currentThread().getName());
         //设置初始密码并赋值
          employeeParam.setPassword( DigestUtils.md5DigestAsHex("123456".getBytes()));
+        //region 折叠添加员工信息
         LocalDateTime now =  LocalDateTime.now();
         employeeParam.setCreateTime(now);
         employeeParam.setUpdateTime(now);
@@ -104,6 +107,7 @@ public class EmployeeController {
         employeeParam.setCreateUser(attribute);
         //修改人
         employeeParam.setUpdateUser(attribute);
+        //endregion
         //保存业务
         iEmployeeService.save(employeeParam);
         return R.success("添加成功");
@@ -117,12 +121,12 @@ public class EmployeeController {
      * @return
      */
     @GetMapping("/page")
-    public R<Page> page(int page,int pageSize,String name) {
+    public R<Page<Employee>> page(int page,int pageSize,String name) {
         log.info("page = {},pageSize = {},name = {}" ,page,pageSize,name);
         //当前页
         //当前要显示多少行
         //分页page对象
-            Page pageInfo=new Page(page,pageSize);
+            Page<Employee> pageInfo=new Page<>();
             //当前页
         pageInfo.setCurrent(page);
         //当前行
@@ -137,7 +141,7 @@ public class EmployeeController {
         //添加排序条件
         //更新时间降序
         wrapper.orderByDesc(Employee::getUpdateTime);
-        Page page1 = iEmployeeService.page(pageInfo, wrapper);
+        Page <Employee>page1 = iEmployeeService.page(pageInfo, wrapper);
         return R.success(page1);
     }
 
@@ -154,9 +158,11 @@ public class EmployeeController {
         if (attribute==null){
             R.error("拜拜");
         }
+        //region 修改状态信息折叠
         LocalDateTime now =  LocalDateTime.now();
         employeeParam.setUpdateTime(now);
         employeeParam.setUpdateUser(attribute);
+        //endregion
         iEmployeeService.updateById(employeeParam);
         // js 只能处理16位以内的数字,如果超过16位,会发生进制,那么会丢失精度
         // 返回的id 是 数字是超过16位的
@@ -165,6 +171,7 @@ public class EmployeeController {
         // DispatcherServlet
         return R.success("修改成功");
     }
+
 
     @GetMapping("/{id}")
     public R<Employee>update(@PathVariable Long id){

@@ -6,6 +6,9 @@ import com.itheima.ruji.mapper.IEmployeeMappper;
 import com.itheima.ruji.service.IEmployeeService;
 import org.springframework.stereotype.Service;
 
+/**
+ * 信息表的业务层实现类
+ */
 @Service
-public class EmployeeService  extends ServiceImpl<IEmployeeMappper, Employee>implements IEmployeeService {
+public class EmployeeServiceImpl extends ServiceImpl<IEmployeeMappper, Employee>implements IEmployeeService {
 }

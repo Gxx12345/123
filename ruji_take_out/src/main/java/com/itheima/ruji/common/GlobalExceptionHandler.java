@@ -3,6 +3,7 @@ package com.itheima.ruji.common;
 import com.itheima.ruji.controller.EmployeeController;
 import com.itheima.ruji.filter.LoginCheckFilter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,5 +31,12 @@ public class GlobalExceptionHandler {
             return R.error(s[2]+"存在");
         }
         return R.error("未知错误");
+    }
+    @ExceptionHandler(CustomException.class)
+    public R<String>exceptionHandler(CustomException exception){
+        log.info("ex----->{}",exception.toString());
+        //我们可以再这里记录日志
+        //往往我们是要记录在数据库中
+        return  R.error(exception.getMessage());
     }
 }

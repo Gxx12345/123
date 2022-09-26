@@ -19,7 +19,7 @@ import java.time.format.DateTimeFormatter;
 import static com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES;
 
 /**
- * 对象映射器
+ * 对象转换器
  *
  * @author Gzz
  * @since 2022/9/24 19:30
