@@ -15,6 +15,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -34,6 +35,7 @@ public class DishController {
 
     /**
      * 菜品分页查询
+     *
      * @param page
      * @param pageSize
      * @param name
@@ -45,9 +47,9 @@ public class DishController {
         dishPage.setCurrent(page);
         dishPage.setSize(pageSize);
         LambdaQueryWrapper<Dish> lambdaQueryWrapper = new LambdaQueryWrapper<>();
-        lambdaQueryWrapper.like(StringUtils.isNotBlank(name),Dish::getName,name)
+        lambdaQueryWrapper.like(StringUtils.isNotBlank(name), Dish::getName, name)
                 .orderByDesc(Dish::getUpdateTime);
-        dishService.page(dishPage,lambdaQueryWrapper);
+        dishService.page(dishPage, lambdaQueryWrapper);
         if (dishPage.getRecords() == null) {
             return Result.success(new Page<DishDto>());
         }
@@ -68,6 +70,7 @@ public class DishController {
 
     /**
      * 新增菜品
+     *
      * @param dishDtoParam
      * @return
      */
@@ -79,6 +82,7 @@ public class DishController {
 
     /**
      * 根据id回显菜品信息
+     *
      * @param id
      * @return
      */
@@ -90,6 +94,7 @@ public class DishController {
 
     /**
      * 修改菜品信息
+     *
      * @param dishDto
      * @return
      */
@@ -97,5 +102,40 @@ public class DishController {
     public Result<String> updateDish(@RequestBody DishDto dishDto) {
         dishService.updateWithFlavor(dishDto);
         return Result.success(GlobalConstant.FINISHED);
+    }
+
+    /**
+     * 批量删除菜品
+     *
+     * @param ids
+     * @return
+     */
+    @DeleteMapping
+    public Result<String> deleteByIds(Long[] ids) {
+        if (ids.length == 0) {
+            return Result.error(GlobalConstant.FAILED);
+        }
+        boolean remove = dishService.removeByIds(Arrays.asList(ids));
+        return remove ? Result.success(GlobalConstant.FINISHED) : Result.error(GlobalConstant.FAILED);
+    }
+
+    /**
+     * 批量修改菜品状态
+     * @param status
+     * @param ids
+     * @return
+     */
+    @PostMapping("/status/{status}")
+    public Result<String> updateStatus(@PathVariable Integer status, Long[] ids) {
+        if (status == null || ids.length == 0) {
+            return Result.error(GlobalConstant.FAILED);
+        }
+        LambdaQueryWrapper<Dish> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.in(Dish::getId,ids);
+        Dish dish = new Dish();
+        dish.setStatus(status);
+        boolean update = dishService.update(dish,queryWrapper);
+        return update ? Result.success(GlobalConstant.FINISHED) : Result.error(GlobalConstant.FAILED);
+
     }
 }
