@@ -48,6 +48,9 @@ public class CategoryController {
      */
     @GetMapping("/page")
     public Result<Page<Category>> pageResult(Integer page, Integer pageSize) {
+        if (page == null || pageSize == null) {
+            return Result.error(GlobalConstant.FAILED);
+        }
         Page<Category> categoryPage = new Page<>();
         categoryPage.setCurrent(page);
         categoryPage.setSize(pageSize);
@@ -64,6 +67,9 @@ public class CategoryController {
      */
     @DeleteMapping
     public Result<String> delete(Long id) {
+        if (id == null) {
+            return Result.error(GlobalConstant.FAILED);
+        }
         service.remove(id);
         return Result.success(GlobalConstant.FINISHED);
     }

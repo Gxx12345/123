@@ -29,4 +29,6 @@ public interface IDishService extends IService<Dish> {
      * @param dishDto
      */
     void updateWithFlavor(DishDto dishDto);
+
+    void deleteByIds(Long[] ids);
 }

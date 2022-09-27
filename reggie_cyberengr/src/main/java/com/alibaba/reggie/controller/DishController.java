@@ -13,6 +13,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
@@ -43,6 +44,9 @@ public class DishController {
      */
     @GetMapping("/page")
     public Result<Page<DishDto>> pageResult(Long page, Long pageSize, String name) {
+        if (page == null || pageSize == null) {
+            return Result.error(GlobalConstant.FAILED);
+        }
         Page<Dish> dishPage = new Page<>();
         dishPage.setCurrent(page);
         dishPage.setSize(pageSize);
@@ -76,6 +80,9 @@ public class DishController {
      */
     @PostMapping
     public Result<String> insertDish(@RequestBody DishDto dishDtoParam) {
+        if (dishDtoParam == null || dishDtoParam.getId() == null) {
+            return Result.error(GlobalConstant.FAILED);
+        }
         dishService.saveWithFlavor(dishDtoParam);
         return Result.success(GlobalConstant.FINISHED);
     }
@@ -88,6 +95,9 @@ public class DishController {
      */
     @GetMapping("/{id}")
     public Result<DishDto> getDishDto(@PathVariable Long id) {
+        if (id == null) {
+            return Result.error(GlobalConstant.FAILED);
+        }
         DishDto dto = dishService.getByIdWithFlavor(id);
         return Result.success(dto);
     }
@@ -100,6 +110,9 @@ public class DishController {
      */
     @PutMapping
     public Result<String> updateDish(@RequestBody DishDto dishDto) {
+        if (dishDto == null || dishDto.getId() == null) {
+            return Result.error(GlobalConstant.FAILED);
+        }
         dishService.updateWithFlavor(dishDto);
         return Result.success(GlobalConstant.FINISHED);
     }
@@ -115,12 +128,13 @@ public class DishController {
         if (ids.length == 0) {
             return Result.error(GlobalConstant.FAILED);
         }
-        boolean remove = dishService.removeByIds(Arrays.asList(ids));
-        return remove ? Result.success(GlobalConstant.FINISHED) : Result.error(GlobalConstant.FAILED);
+        dishService.deleteByIds(ids);
+        return Result.success(GlobalConstant.FINISHED);
     }
 
     /**
      * 批量修改菜品状态
+     *
      * @param status
      * @param ids
      * @return
@@ -131,10 +145,10 @@ public class DishController {
             return Result.error(GlobalConstant.FAILED);
         }
         LambdaQueryWrapper<Dish> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.in(Dish::getId,ids);
+        queryWrapper.in(Dish::getId, ids);
         Dish dish = new Dish();
         dish.setStatus(status);
-        boolean update = dishService.update(dish,queryWrapper);
+        boolean update = dishService.update(dish, queryWrapper);
         return update ? Result.success(GlobalConstant.FINISHED) : Result.error(GlobalConstant.FAILED);
 
     }

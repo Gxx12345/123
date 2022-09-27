@@ -1,6 +1,7 @@
 package com.alibaba.reggie.service.impl;
 
 import com.alibaba.reggie.common.CustomException;
+import com.alibaba.reggie.common.GlobalConstant;
 import com.alibaba.reggie.entity.Dish;
 import com.alibaba.reggie.entity.DishDto;
 import com.alibaba.reggie.entity.DishFlavor;
@@ -9,11 +10,13 @@ import com.alibaba.reggie.service.IDishFlavorService;
 import com.alibaba.reggie.service.IDishService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -68,6 +71,7 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements ID
      * @param dishDto
      */
     @Override
+    @Transactional
     public void updateWithFlavor(DishDto dishDto) {
         Dish dish = new Dish();
         BeanUtils.copyProperties(dishDto,dish);
@@ -77,5 +81,23 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements ID
         dishFlavorService.remove(queryWrapper);
         dishDto.getFlavors().stream().forEach(item->item.setDishId(dish.getId()));
         dishFlavorService.saveBatch(dishDto.getFlavors());
+    }
+
+    /**
+     * 删除菜品信息
+     * @param ids
+     */
+    @Transactional
+    @Override
+    public void deleteByIds(Long[] ids) {
+        try {
+            this.removeByIds(Arrays.asList(ids));
+            LambdaQueryWrapper<DishFlavor> queryWrapper = new LambdaQueryWrapper<>();
+            queryWrapper.in(DishFlavor::getDishId,ids);
+            dishFlavorService.remove(queryWrapper);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new CustomException(GlobalConstant.FAILED);
+        }
     }
 }

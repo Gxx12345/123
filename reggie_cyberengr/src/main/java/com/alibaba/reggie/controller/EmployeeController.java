@@ -103,16 +103,17 @@ public class EmployeeController {
      */
     @GetMapping("/page")
     public Result<Page<Employee>> pageResult(Long page, Long pageSize, String name) {
+        if (page == null || pageSize == null) {
+            return Result.error(null);
+        }
         //mybatisplus的分页插件
         Page<Employee> employeePage = new Page<>();
         employeePage.setCurrent(page);
         employeePage.setSize(pageSize);
         //mybatisplus的查询条件
         LambdaQueryWrapper<Employee> queryWrapper = new LambdaQueryWrapper<>();
-        if (StringUtils.isNotBlank(name)) {
-            queryWrapper.like(Employee::getName, name);
-        }
-        queryWrapper.orderByDesc(Employee::getUpdateTime);
+        queryWrapper.like(StringUtils.isNotBlank(name), Employee::getName, name)
+                .orderByDesc(Employee::getUpdateTime);
         //进行分页查询
         service.page(employeePage, queryWrapper);
         return Result.success(employeePage);
@@ -120,6 +121,7 @@ public class EmployeeController {
 
     /**
      * 根据id更新员工
+     *
      * @param employeeParam
      * @param request
      * @return
@@ -131,22 +133,25 @@ public class EmployeeController {
         Long id = (Long) request.getSession().getAttribute(GlobalConstant.EMPLOYEE_KEY);
         employeeParam.setUpdateUser(id);*/
         //endregion
+        if (employeeParam.getId() == null) {
+            return Result.error(GlobalConstant.FAILED);
+        }
         boolean update = service.updateById(employeeParam);
-        return update?Result.success(GlobalConstant.FINISHED) : Result.error(GlobalConstant.FAILED);
+        return update ? Result.success(GlobalConstant.FINISHED) : Result.error(GlobalConstant.FAILED);
     }
 
     /**
      * 根据id查询员工
+     *
      * @param id
      * @return
      */
     @GetMapping("/{id}")
     public Result<Employee> selectById(@PathVariable Long id) {
-        Employee employee = service.getById(id);
-        if (null != employee) {
-            return Result.success(employee);
+        Employee employee=null;
+        if (id == null || (employee = service.getById(id)) == null) {
+            return Result.error(GlobalConstant.FAILED);
         }
-        return Result.error("输入参数有误!");
+        return Result.success(employee);
     }
-
 }
