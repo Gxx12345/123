@@ -78,7 +78,7 @@ public class EmployeeController {
     public R<String> logout(HttpServletRequest request) {
         //清理Session中保存的当前登录员工的id
         request.getSession().removeAttribute(GlobalConstant.EMPLOYEE_KEY);
-        return R.success("退出成功");
+        return R.success(GlobalConstant.FINISH);
     }
 
 
@@ -117,7 +117,7 @@ public class EmployeeController {
         //使用Service接口调用mybatis-plus中的方法
         iEmployeeService.save(employeeParam);
 
-        return R.success("新增员工成功");
+        return R.success(GlobalConstant.FINISH);
     }
 
 
@@ -175,7 +175,7 @@ public class EmployeeController {
         //调用mybatis-plus中的方法修改对象信息
         iEmployeeService.updateById(employeeParam);
 
-        return R.success("修改成功");
+        return R.success(GlobalConstant.FINISH);
     }
 
 
