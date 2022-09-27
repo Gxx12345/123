@@ -19,3 +19,8 @@ mybatis-plus:
   global-config:
     db-config:
       id-type: ASSIGN_ID
+
+# 自定义属性
+# 文件上传路径
+reggie:
+  path: E:\image

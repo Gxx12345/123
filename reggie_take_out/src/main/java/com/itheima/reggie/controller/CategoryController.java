@@ -10,6 +10,8 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 /**
  * 分类Controller控制层
  *
@@ -80,6 +82,7 @@ public class CategoryController {
 
     /**
      * 根据id删除分类
+     *
      * @param id
      * @return
      */
@@ -91,9 +94,9 @@ public class CategoryController {
     }
 
 
-
     /**
      * 根据id修改分类信息
+     *
      * @param categoryParam
      * @return
      */
@@ -104,4 +107,21 @@ public class CategoryController {
     }
 
 
+    /**
+     * 获取菜品分类集合
+     * @param categoryParam 类型 --- 1 菜品  2 套餐
+     * @return
+     */
+    @GetMapping("/list")
+    public R<List<Category>> getList(Category categoryParam) {
+
+        LambdaQueryWrapper<Category> queryWrapper = new LambdaQueryWrapper<>();
+        // 参数校验
+        // 第一个参数是布尔类型的，判断传来的类型是否存在，true则拼接后面的条件 ，false则跳过
+        queryWrapper.eq(categoryParam.getType() != null ,Category::getType,categoryParam.getType());
+        // 排序
+        queryWrapper.orderByAsc(Category::getSort).orderByDesc(Category::getUpdateTime);
+        List<Category> categoryList = iCategoryService.list(queryWrapper);
+        return R.success(categoryList);
+    }
 }

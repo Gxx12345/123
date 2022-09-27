@@ -32,7 +32,8 @@ public class LoginFilter implements Filter {
                 "/backend/**",
                 "/front/**",
                 "/employee/login",
-                "/employee/logout"
+                "/employee/logout",
+                "/common/**"
         };
 
         //对比传进来的路径和需要过滤的路径是否匹配

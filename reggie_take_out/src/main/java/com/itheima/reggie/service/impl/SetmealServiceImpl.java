@@ -13,5 +13,5 @@ import org.springframework.stereotype.Service;
  * @since 2022/9/26 17:51
  */
 @Service
-public class SetmealImpl extends ServiceImpl<SetmealMapper, Setmeal> implements ISetmealService {
+public class SetmealServiceImpl extends ServiceImpl<SetmealMapper, Setmeal> implements ISetmealService {
 }

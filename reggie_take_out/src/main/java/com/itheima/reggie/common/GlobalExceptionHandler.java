@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.io.FileNotFoundException;
 import java.sql.SQLIntegrityConstraintViolationException;
 
 /**
@@ -17,7 +18,7 @@ import java.sql.SQLIntegrityConstraintViolationException;
  */
 @Slf4j
 @ResponseBody // 将方法的返回值 R 对象转换为json格式的数据, 响应给页面
-@ControllerAdvice(annotations = {RestController.class,Controller.class}) // 指定拦截那些类型的控制器
+@ControllerAdvice(annotations = {RestController.class, Controller.class}) // 指定拦截那些类型的控制器
 public class GlobalExceptionHandler {
 
     // 指定拦截的是哪一类型的异常
@@ -39,8 +40,9 @@ public class GlobalExceptionHandler {
     // 指定拦截的是哪一类型的异常
     @ExceptionHandler(CustomException.class)
     public R<String> exceptionHandler(CustomException exception) {
-        log.info("exception ==> {}",exception.getMessage());
+        log.info("exception ==> {}", exception.getMessage());
 
         return R.error(exception.getMessage());
     }
+
 }
