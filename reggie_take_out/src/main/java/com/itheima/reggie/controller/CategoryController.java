@@ -6,12 +6,9 @@ import com.itheima.reggie.common.GlobalConstant;
 import com.itheima.reggie.common.R;
 import com.itheima.reggie.entity.Category;
 import com.itheima.reggie.service.ICategoryService;
-import com.itheima.reggie.service.IEmployeeService;
-import com.itheima.reggie.service.impl.CategoryServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -93,5 +90,17 @@ public class CategoryController {
     public R<String> update(@RequestBody Category category){
         this.categoryService.updateById(category);
         return R.success(GlobalConstant.FINISH);
+    }
+
+    /**
+     * 新增菜品时查询分类列表
+     */
+    @GetMapping("/list")
+    public R<List<Category>> list(Category category){
+        LambdaQueryWrapper<Category> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(category.getType() != null,Category::getType,category.getType());
+        queryWrapper.orderByAsc(Category::getSort).orderByDesc(Category::getUpdateTime);
+        List<Category> list = this.categoryService.list(queryWrapper);
+        return R.success(list);
     }
 }
