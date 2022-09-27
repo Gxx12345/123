@@ -6,7 +6,7 @@ import com.itheima.common.CustomException;
 import com.itheima.entity.Category;
 import com.itheima.entity.Dish;
 import com.itheima.entity.Setmeal;
-import com.itheima.mapper.ICategoryMapper;
+import com.itheima.mapper.CategoryMapper;
 import com.itheima.service.ICategoryService;
 import com.itheima.service.IDishService;
 import com.itheima.service.ISetmealService;
@@ -20,7 +20,7 @@ import org.springframework.stereotype.Service;
  * @since 2022/9/26 12:05
  */
 @Service
-public class CategoryServiceImpl extends ServiceImpl<ICategoryMapper, Category> implements ICategoryService {
+public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> implements ICategoryService {
 
     /**
      * 菜品

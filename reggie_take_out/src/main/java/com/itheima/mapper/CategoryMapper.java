@@ -1,15 +1,15 @@
 package com.itheima.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.itheima.entity.Setmeal;
+import com.itheima.entity.Category;
 import org.apache.ibatis.annotations.Mapper;
 
 /**
- * 套餐的持久层
+ * 分类持久层
  *
  * @author L
- * @since 2022/9/26 17:59
+ * @since 2022/9/26 12:03
  */
 @Mapper
-public interface ISetmealMapper extends BaseMapper<Setmeal> {
+public interface CategoryMapper extends BaseMapper<Category> {
 }

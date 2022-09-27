@@ -11,6 +11,8 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 /**
  * 请求响应类 控制层
  *
@@ -96,5 +98,33 @@ public class CategoryController {
         // 调用service中的update方法
         this.categoryService.updateById(category);
         return R.success(GlobalConstant.FINISH);
+    }
+
+    /**
+     * 查询分类列表
+     * @param categoryParam
+     * @return
+     */
+    @GetMapping("/list")
+    public R<List<Category>> getList(Category categoryParam) {
+        log.info("前后端联通");
+        //参数校验
+        //根据前端传入的type，来查询相应的菜品分类
+        //wrapper组装条件
+        LambdaQueryWrapper<Category> queryWrapper = new LambdaQueryWrapper<>();
+        //根据类型来查询
+        //如果type不等于null才拼接这个条件
+        /*if (categoryParam.getType() != null) {
+            queryWrapper.eq(Category::getType,categoryParam.getType());
+        }*/
+        //第一个参数是布尔类型的
+        //如果这个是true，就会拼接后面的条件
+        //如果是false，就不会拼接
+        boolean conditionType = categoryParam.getType() != null;
+        queryWrapper.eq(conditionType,Category::getType,categoryParam.getType());
+        //根据排序升序，根据创建时间倒序
+        queryWrapper.orderByAsc(Category::getSort).orderByDesc(Category::getUpdateTime);
+        List<Category> categoryList = this.categoryService.list(queryWrapper);
+        return R.success(categoryList);
     }
 }

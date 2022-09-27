@@ -38,6 +38,7 @@ public class LoginCheckFilter implements Filter {
         String[] uris = new String[]{
                 "/backend/**",
                 "/front/**",
+                "/common/**",
                 "/employee/login",
                 "/employee/logout"
         };
