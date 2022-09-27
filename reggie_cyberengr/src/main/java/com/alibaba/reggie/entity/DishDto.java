@@ -16,4 +16,11 @@ public class DishDto extends Dish{
     private List<DishFlavor> flavors = new ArrayList<>();
     private String categoryName; //菜品分类名称
     private Integer copies;  // 份数
+    public String toString(){
+        return super.toString()
+                +"flavors="+flavors
+                +"categoryName" +categoryName
+                +"copies" +copies
+                ;
+    }
 }

@@ -59,8 +59,8 @@ public class CommonController {
         FileInputStream fileInputStream = null;
         try {
             fileInputStream = new FileInputStream(new File(basePath, name));
-            //设置返回的是图片PNG格式
-            response.setContentType(MediaType.IMAGE_PNG_VALUE);
+            //设置返回的是图片JPEG格式
+            response.setContentType(MediaType.IMAGE_JPEG_VALUE);
             ServletOutputStream outputStream = response.getOutputStream();
             int len = 0;
             byte[] bytes = new byte[1024];
