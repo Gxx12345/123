@@ -29,7 +29,7 @@ public class LoginFilter implements Filter {
         //定义不用拦截的路径,进行判断
         String[] uris = {
                 "/backend/**", "/front/**",
-                "/employee/login", "/employee/logout"};
+                "/employee/login", "/employee/logout","/common/**"};
         for (String uri : uris) {
             //AntPathMatcher路径匹配器对象的match方法比较路径
             if (MATCHER.match(uri,requestURI)) {

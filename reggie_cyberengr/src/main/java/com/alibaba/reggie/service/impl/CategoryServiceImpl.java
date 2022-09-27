@@ -3,7 +3,7 @@ package com.alibaba.reggie.service.impl;
 import com.alibaba.reggie.entity.Category;
 import com.alibaba.reggie.entity.Dish;
 import com.alibaba.reggie.entity.Setmeal;
-import com.alibaba.reggie.exception.CustomException;
+import com.alibaba.reggie.common.CustomException;
 import com.alibaba.reggie.mapper.CategoryMapper;
 import com.alibaba.reggie.service.ICategoryService;
 import com.alibaba.reggie.service.IDishService;

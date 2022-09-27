@@ -1,4 +1,4 @@
-package com.alibaba.reggie.exception;
+package com.alibaba.reggie.common;
 
 /**
  * 删除分类异常

@@ -10,6 +10,8 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 /**
  * 分类管理
  *
@@ -63,10 +65,25 @@ public class CategoryController {
 
     @PutMapping
     public Result<String> update(@RequestBody Category category) {
+        if (category.getId() == null) {
+            return Result.error("传入的参数错误!");
+        }
         if (service.getById(category) != null) {
             boolean update = service.updateById(category);
             return update ? Result.success(GlobalConstant.FINISHED) : Result.error(GlobalConstant.FAILED);
         }
         return Result.error(GlobalConstant.FAILED);
+    }
+
+    @GetMapping("/list")
+    public Result<List<Category>> list(@RequestBody Category categoryParam) {
+        Integer type = categoryParam.getType();
+        LambdaQueryWrapper<Category> queryWrapper = new LambdaQueryWrapper();
+        queryWrapper.eq(type != null, Category::getType, type)
+                .orderByAsc(Category::getSort)
+                .orderByDesc(Category::getUpdateTime);
+        List<Category> list = service.list(queryWrapper);
+        return Result.success(list);
+
     }
 }
