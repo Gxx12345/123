@@ -1,6 +1,5 @@
 package com.itheima.reggie.controller;
 
-import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.itheima.reggie.common.GlobalConstant;
@@ -85,19 +84,21 @@ public class EmployeeController {
         String initPassword = DigestUtils.md5DigestAsHex("123456".getBytes());
         employeeParam.setPassword(initPassword);
 
+        //region mp的公共字段自动填充
         //设置创建和更新时间
-        LocalDateTime now = LocalDateTime.now();
-        employeeParam.setCreateTime(now);
-        employeeParam.setUpdateTime(now);
-
-        //从session中获取用户ID
-        //并设置创建、更新用户ID值
-        //当前登录用户ID
-        Long employeeId = (Long) request.getSession().getAttribute(GlobalConstant.EMPLOYEE_KEY);
-        //创建人
-        employeeParam.setCreateUser(employeeId);
-        //修改人
-        employeeParam.setUpdateUser(employeeId);
+        // LocalDateTime now = LocalDateTime.now();
+        // employeeParam.setCreateTime(now);
+        // employeeParam.setUpdateTime(now);
+        //
+        // //从session中获取用户ID
+        // //并设置创建、更新用户ID值
+        // //当前登录用户ID
+        // Long employeeId = (Long) request.getSession().getAttribute(GlobalConstant.EMPLOYEE_KEY);
+        // //创建人
+        // employeeParam.setCreateUser(employeeId);
+        // //修改人
+        // employeeParam.setUpdateUser(employeeId);
+        //endregion
         //保存
         this.employeeService.save(employeeParam);
         return R.success("保存成功");
@@ -127,4 +128,36 @@ public class EmployeeController {
         Page<Employee> result = this.employeeService.page(queryPage, queryWrapper);
         return R.success(result);
     }
+
+    /**
+     * 员工信息修改
+     */
+    @PutMapping
+    public R<String> update(HttpServletRequest request,@RequestBody Employee employee){
+        log.info(employee.toString());
+
+        Long empId = (Long) request.getSession().getAttribute(GlobalConstant.EMPLOYEE_KEY);
+
+        employee.setUpdateTime(LocalDateTime.now());
+        employee.setUpdateUser(empId);
+        employeeService.updateById(employee);
+
+        return R.success("员工信息修改成功");
+    }
+
+    /**
+     * 根据id查询员工信息
+     * @param id
+     * @return
+     */
+    @GetMapping("/{id}")
+    public R<Employee> getById(@PathVariable Long id){
+        log.info("根据id查询员工信息...");
+        Employee employee = employeeService.getById(id);
+        if(employee != null){
+            return R.success(employee);
+        }
+        return R.error("没有查询到对应员工信息");
+    }
+
 }

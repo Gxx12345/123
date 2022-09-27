@@ -1,6 +1,7 @@
 package com.itheima.reggie.filter;
 
 import com.alibaba.fastjson.JSON;
+import com.itheima.reggie.common.BaseContext;
 import com.itheima.reggie.common.GlobalConstant;
 import com.itheima.reggie.common.R;
 import lombok.extern.slf4j.Slf4j;
@@ -11,6 +12,10 @@ import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+
+/**
+ * 过滤器
+ */
 
 @Slf4j
 @WebFilter(filterName = "loginCheckFilter",urlPatterns = "/*")
@@ -43,7 +48,11 @@ public class LoginCheckFilter implements Filter {
             }
         }
         //4、判断登录状态，如果已登录，则直接放行
-        if(request.getSession().getAttribute(GlobalConstant.EMPLOYEE_KEY) != null){
+        Long employeeId = (Long) request.getSession().getAttribute(GlobalConstant.EMPLOYEE_KEY);
+        if(employeeId != null){
+            //如果当前用户已登录，那么需要把当前用户登录的ID，放入到Threadlocal中，以便在后续的线程调用中使用相关的值
+            BaseContext.setCurrentId(employeeId);
+
             log.info("用户已登录，用户id为：{}",request.getSession().getAttribute(GlobalConstant.EMPLOYEE_KEY));
             filterChain.doFilter(request,response);
             return;
