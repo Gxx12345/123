@@ -1,6 +1,7 @@
 package com.alibaba.reggie.controller;
 
 import com.alibaba.reggie.common.CustomException;
+import com.alibaba.reggie.common.GlobalConstant;
 import com.alibaba.reggie.common.Result;
 import com.alibaba.reggie.entity.Category;
 import com.alibaba.reggie.entity.Dish;
@@ -31,6 +32,13 @@ public class DishController {
     @Autowired
     private ICategoryService categoryService;
 
+    /**
+     * 菜品分页查询
+     * @param page
+     * @param pageSize
+     * @param name
+     * @return
+     */
     @GetMapping("/page")
     public Result<Page<DishDto>> pageResult(Long page, Long pageSize, String name) {
         Page<Dish> dishPage = new Page<>();
@@ -58,9 +66,36 @@ public class DishController {
         return Result.success(result);
     }
 
+    /**
+     * 新增菜品
+     * @param dishDtoParam
+     * @return
+     */
     @PostMapping
     public Result<String> insertDish(@RequestBody DishDto dishDtoParam) {
         dishService.saveWithFlavor(dishDtoParam);
-        return Result.success("添加成功");
+        return Result.success(GlobalConstant.FINISHED);
+    }
+
+    /**
+     * 根据id回显菜品信息
+     * @param id
+     * @return
+     */
+    @GetMapping("/{id}")
+    public Result<DishDto> getDishDto(@PathVariable Long id) {
+        DishDto dto = dishService.getByIdWithFlavor(id);
+        return Result.success(dto);
+    }
+
+    /**
+     * 修改菜品信息
+     * @param dishDto
+     * @return
+     */
+    @PutMapping
+    public Result<String> updateDish(@RequestBody DishDto dishDto) {
+        dishService.updateWithFlavor(dishDto);
+        return Result.success(GlobalConstant.FINISHED);
     }
 }

@@ -31,6 +31,11 @@ public class CommonController {
     @Value("${reggie.path}")
     private String basePath;
 
+    /**
+     * 文件上传
+     * @param file
+     * @return
+     */
     @PostMapping("/upload")
     public Result<String> upload(MultipartFile file) {
         if (file == null || StringUtils.isBlank(file.getOriginalFilename())) {
@@ -54,6 +59,12 @@ public class CommonController {
         return Result.success(newFileName);
     }
 
+    /**
+     * 图片下载
+     * @param name
+     * @param response
+     * @throws IOException
+     */
     @GetMapping("/download")
     public void download(@RequestParam String name, HttpServletResponse response) throws IOException {
         FileInputStream fileInputStream = null;

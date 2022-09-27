@@ -57,12 +57,22 @@ public class CategoryController {
         return Result.success(categoryPage);
     }
 
+    /**
+     * 根据id删除
+     * @param id
+     * @return
+     */
     @DeleteMapping
     public Result<String> delete(Long id) {
         service.remove(id);
         return Result.success(GlobalConstant.FINISHED);
     }
 
+    /**
+     * 更新分类
+     * @param category
+     * @return
+     */
     @PutMapping
     public Result<String> update(@RequestBody Category category) {
         if (category.getId() == null) {
@@ -75,6 +85,11 @@ public class CategoryController {
         return Result.error(GlobalConstant.FAILED);
     }
 
+    /**
+     * 查询分类列表
+     * @param categoryParam
+     * @return
+     */
     @GetMapping("/list")
     public Result<List<Category>> list(Category categoryParam) {
         Integer type = categoryParam.getType();
@@ -84,6 +99,5 @@ public class CategoryController {
                 .orderByDesc(Category::getUpdateTime);
         List<Category> list = service.list(queryWrapper);
         return Result.success(list);
-
     }
 }

@@ -118,6 +118,12 @@ public class EmployeeController {
         return Result.success(employeePage);
     }
 
+    /**
+     * 根据id更新员工
+     * @param employeeParam
+     * @param request
+     * @return
+     */
     @PutMapping
     public Result<String> updateStatus(@RequestBody Employee employeeParam, HttpServletRequest request) {
         //region 公共字段填充
@@ -129,6 +135,11 @@ public class EmployeeController {
         return update?Result.success(GlobalConstant.FINISHED) : Result.error(GlobalConstant.FAILED);
     }
 
+    /**
+     * 根据id查询员工
+     * @param id
+     * @return
+     */
     @GetMapping("/{id}")
     public Result<Employee> selectById(@PathVariable Long id) {
         Employee employee = service.getById(id);
