@@ -5,7 +5,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.itheima.common.R;
 import com.itheima.entity.Employee;
-import com.itheima.service.EmployeeService;
+import com.itheima.service.IEmployeeService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +24,7 @@ import static com.itheima.common.GlobalConstant.EMPLOYEE_KEY;
 public class EmployeeController {
 
     @Autowired
-    private EmployeeService employeeService;
+    private IEmployeeService employeeService;
     /**
      * 登录的接口
      */

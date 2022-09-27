@@ -1,6 +1,7 @@
 package com.itheima.filter;
 
 import com.alibaba.fastjson.JSON;
+import com.itheima.common.BaseContext;
 import com.itheima.common.GlobalConstant;
 import com.itheima.common.R;
 import lombok.extern.slf4j.Slf4j;
@@ -63,6 +64,9 @@ public class LoginCheckFilter implements Filter {
         //用户ID不为空，代表已登录
         if (employeeId != null) {
             //放行
+            log.info("过滤器中：当前线程ID ==>{}",Thread.currentThread().getId());
+            //如果当前用户以登录，那么需要把当前用户登录的ID，放入到ThreadLocal中，以便在后续的线程中使用相关的值
+            BaseContext.setCurrentUser(employeeId);
             filterChain.doFilter(servletRequest,servletResponse);
             return;
         }

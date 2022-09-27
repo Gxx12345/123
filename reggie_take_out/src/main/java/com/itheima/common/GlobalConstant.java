@@ -8,4 +8,8 @@ package com.itheima.common;
  */
 public class GlobalConstant {
     public static final String EMPLOYEE_KEY = "employee";
+
+    public static final String FINISH = "操作成功";
+
+    public static final String FAILED = "操作失败";
 }

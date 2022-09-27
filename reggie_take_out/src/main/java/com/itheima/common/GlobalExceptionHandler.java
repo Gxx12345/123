@@ -30,4 +30,12 @@ public class GlobalExceptionHandler {
         }
         return R.error("未知错误");
     }
+
+    @ExceptionHandler(CustomException.class)
+    public R<String> customException(CustomException exception) {
+        log.info("ex => {}", exception.getMessage());
+        // 我们可以在这里记录日志
+        // 往往我们是要记录到数据库中
+        return R.error(exception.getMessage());
+    }
 }
