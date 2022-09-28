@@ -23,3 +23,12 @@ mybatis-plus:
     db-config:
       # id的生成规则
       id-type: ASSIGN_ID
+
+
+reggie:
+  path: E:\images
+
+# 这是将日志中的条件转换成sql语句
+#logging:
+#  level:
+ #   com.itheima.reggie.mapper:debug

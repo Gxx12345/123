@@ -12,6 +12,8 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 /**
  * 分类控制层
  *
@@ -97,7 +99,7 @@ public class CategoryController {
     }
     //
     @PutMapping
-    public R<String>update(Category categoryParam){
+    public R<String>update(@RequestBody Category categoryParam){
         //分类名称
         if (StringUtils.isBlank(categoryParam.getName())) {
             return    R.error(AntPathmathcherSS.FAILED);
@@ -112,5 +114,18 @@ public class CategoryController {
         }
         categoryService.updateById(categoryParam);
         return R.success(AntPathmathcherSS.FINISH);
+    }
+    /**
+     * 修改分类
+     */
+    @GetMapping("/list")
+    public  R<List<Category>> selectDish(Category categoryParam){
+        LambdaQueryWrapper<Category> wrapper = new LambdaQueryWrapper<>();
+        if (categoryParam.getType()!=null) {
+            wrapper.eq(Category::getType, categoryParam.getType());
+            wrapper.orderByAsc(Category::getSort).orderByDesc(Category::getUpdateTime);
+        }
+        List<Category> list = categoryService.list(wrapper);
+        return R.success(list);
     }
 }

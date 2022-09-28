@@ -39,7 +39,7 @@ public class LoginCheckFilter implements Filter {
            "/backend/**",
           "/front/**",
           "/employee/login",
-          "/employee/logout"
+          "/employee/logout","/common/**"
   };
         for (String uri : uris) {
             boolean match = ANT_PATH_MATCHER.match(uri, currentUri); //前面是我们要匹配的内容,后面是前端传来的内容
