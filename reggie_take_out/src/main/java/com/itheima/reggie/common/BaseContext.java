@@ -22,4 +22,5 @@ public class BaseContext {
     public static Long getCurrentUserId() {
         return THREAD_LOCAL_CURRENT_USER.get();
     }
+
 }

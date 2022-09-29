@@ -95,7 +95,7 @@ public class DishController {
         List<DishDto> dishDtoList2 = dishPage.getRecords().stream().map(item -> {
             DishDto dishDto = new DishDto();
             //  Dish -> DishDto
-            BeanUtils.copyProperties(item,dishDto);
+            BeanUtils.copyProperties(item, dishDto);
             //  分类名称
             Category category = categoryService.getById(item.getCategoryId());
             if (category != null) {
@@ -116,9 +116,12 @@ public class DishController {
      */
     @GetMapping("/{id}")
     public R<DishDto> get(@PathVariable Long id) {
+        //  参数校验
         DishDto dishDto = dishService.getByIdWithFlavor(id);
         return R.success(dishDto);
-    };
+    }
+
+    ;
 
     /**
      * 修改菜品
@@ -130,5 +133,22 @@ public class DishController {
     public R<String> update(@RequestBody DishDto dishDto) {
         dishService.updateWithFlavor(dishDto);
         return R.success(GlobalConstant.FINISH);
+    }
+
+    /**
+     * 根据分类id查询相应的菜品
+     */
+    @GetMapping("/list")
+    public R<List<Dish>> getList(Dish dish) {
+        //  拼接条件
+        LambdaQueryWrapper<Dish> queryWrapper = new LambdaQueryWrapper<>();
+        //  等同于if判断
+        queryWrapper.eq(dish.getCategoryId() != null, Dish::getCategoryId, dish.getCategoryId());
+        //  只查询起售状态的菜品
+        //  status 1 起售 0 禁售
+        queryWrapper.eq(Dish::getStatus, 1);
+        queryWrapper.orderByAsc(Dish::getSort).orderByDesc(Dish::getUpdateTime);
+        List<Dish> list = dishService.list(queryWrapper);
+        return R.success(list);
     }
 }

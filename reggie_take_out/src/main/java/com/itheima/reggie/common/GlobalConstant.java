@@ -13,6 +13,12 @@ public class GlobalConstant {
     public static final String EMPLOYEE_KEY = "employee";
 
     /**
+     * 移动端的key
+     */
+    public static final String MOBILE_KEY = "user";
+
+
+    /**
      * 操作成功
      */
     public static final String FINISH = "操作成功";
