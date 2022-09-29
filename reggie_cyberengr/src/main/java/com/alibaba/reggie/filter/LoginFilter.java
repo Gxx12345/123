@@ -29,7 +29,9 @@ public class LoginFilter implements Filter {
         //定义不用拦截的路径,进行判断
         String[] uris = {
                 "/backend/**", "/front/**",
-                "/employee/login", "/employee/logout","/common/**"};
+                "/employee/login", "/employee/logout",
+                "/user/sendMsg","/user/login",
+                "/common/**"};
         for (String uri : uris) {
             //AntPathMatcher路径匹配器对象的match方法比较路径
             if (MATCHER.match(uri,requestURI)) {
@@ -42,6 +44,15 @@ public class LoginFilter implements Filter {
         //存放当前登录用户到ThreadLocal
         BaseContext.setSetThreadLocalCurrentId(employeeId);
         if (null != employeeId) {
+            filterChain.doFilter(servletRequest, servletResponse);
+            return;
+        }
+
+        //根据session值取得userId,判断userId是否为null
+        Long userId = (Long) request.getSession().getAttribute(GlobalConstant.USER_KEY);
+        //存放当前登录用户到ThreadLocal
+        BaseContext.setSetThreadLocalCurrentId(userId);
+        if (null != userId) {
             filterChain.doFilter(servletRequest, servletResponse);
             return;
         }

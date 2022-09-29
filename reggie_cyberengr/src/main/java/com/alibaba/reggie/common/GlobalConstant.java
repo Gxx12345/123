@@ -12,6 +12,10 @@ public interface GlobalConstant {
      */
     String EMPLOYEE_KEY = "employee";
     /**
+     * 定义当前登录用户user的key
+     */
+    String USER_KEY = "user";
+    /**
      * 操作成功变量
      */
     String FINISHED="操作成功";
