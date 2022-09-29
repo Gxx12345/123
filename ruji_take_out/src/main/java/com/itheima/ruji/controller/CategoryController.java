@@ -98,26 +98,15 @@ public class CategoryController {
       return   R.success(AntPathmathcherSS.FINISH);
     }
     //
-    @PutMapping
-    public R<String>update(@RequestBody Category categoryParam){
-        //分类名称
-        if (StringUtils.isBlank(categoryParam.getName())) {
-            return    R.error(AntPathmathcherSS.FAILED);
-        }
-        //排序效验
-        if (categoryParam.getType() == null) {
-            return  R.error(AntPathmathcherSS.FAILED);
-        }
-        //分类类型效验
-        if (categoryParam.getSort() == null) {
-            return   R.error(AntPathmathcherSS.FAILED);
-        }
-        categoryService.updateById(categoryParam);
-        return R.success(AntPathmathcherSS.FINISH);
-    }
     /**
      * 修改分类
      */
+    @PutMapping
+    public R<String>update(@RequestBody Category categoryParam){
+        categoryService.updateById(categoryParam);
+        return R.success(AntPathmathcherSS.FINISH);
+    }
+
     @GetMapping("/list")
     public  R<List<Category>> selectDish(Category categoryParam){
         LambdaQueryWrapper<Category> wrapper = new LambdaQueryWrapper<>();

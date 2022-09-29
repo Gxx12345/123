@@ -47,6 +47,13 @@ public class DishColltroller {
         return R.success(AntPathmathcherSS.FINISH);
     }
 
+    /**
+     * 菜品分页
+     * @param page
+     * @param pageSize
+     * @param name
+     * @return
+     */
     @GetMapping("/page")
     public R<Page<DishDto>>page(Integer page,Integer pageSize,String name){
         // 1. 构造分页条件对象
@@ -142,5 +149,25 @@ public class DishColltroller {
         log.info("前后端联通");// controller -> service -> mapper
         this.dishService.updateWithFlavor(dishDto);
         return R.success(AntPathmathcherSS.FINISH);
+    }
+    /**
+     * 根据分类id查询相应的菜品
+     *
+     * @param dish
+     * @return
+     */
+    @GetMapping("/list")
+    public R<List<Dish>>listDish(Dish dish){
+        //拼接条件
+        LambdaQueryWrapper<Dish> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(dish.getCategoryId() != null,Dish::getCategoryId,dish.getCategoryId());
+        //钱数0.222222222225644898
+        //还要最终被js处理. 设计到这个钱数的问题,我们一般拿分来换算.先给他以分的方式计算.
+        //最终js内部还要进行转换
+        wrapper.eq(Dish::getStatus,1);
+        //1 起售
+        //2 禁售
+        List<Dish> list = dishService.list(wrapper);
+        return R.success(list);
     }
 }

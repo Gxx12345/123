@@ -97,7 +97,7 @@ public class EmployeeController {
         //设置初始密码并赋值
          employeeParam.setPassword( DigestUtils.md5DigestAsHex("123456".getBytes()));
         //region 折叠添加员工信息
-        LocalDateTime now =  LocalDateTime.now();
+      /*  LocalDateTime now =  LocalDateTime.now();
         employeeParam.setCreateTime(now);
         employeeParam.setUpdateTime(now);
         //从seeion中获取员工ID
@@ -106,7 +106,7 @@ public class EmployeeController {
         //添加人
         employeeParam.setCreateUser(attribute);
         //修改人
-        employeeParam.setUpdateUser(attribute);
+        employeeParam.setUpdateUser(attribute);*/
         //endregion
         //保存业务
         iEmployeeService.save(employeeParam);
@@ -159,9 +159,9 @@ public class EmployeeController {
             R.error("拜拜");
         }
         //region 修改状态信息折叠
-        LocalDateTime now =  LocalDateTime.now();
+      /*  LocalDateTime now =  LocalDateTime.now();
         employeeParam.setUpdateTime(now);
-        employeeParam.setUpdateUser(attribute);
+        employeeParam.setUpdateUser(attribute);*/
         //endregion
         iEmployeeService.updateById(employeeParam);
         // js 只能处理16位以内的数字,如果超过16位,会发生进制,那么会丢失精度
