@@ -1,11 +1,10 @@
 package com.alibaba.reggie.controller;
 
-import com.alibaba.reggie.common.CustomException;
 import com.alibaba.reggie.common.GlobalConstant;
 import com.alibaba.reggie.common.Result;
 import com.alibaba.reggie.entity.Category;
 import com.alibaba.reggie.entity.Dish;
-import com.alibaba.reggie.entity.DishDto;
+import com.alibaba.reggie.dto.DishDto;
 import com.alibaba.reggie.service.ICategoryService;
 import com.alibaba.reggie.service.IDishService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -13,10 +12,8 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -152,4 +149,16 @@ public class DishController {
         return update ? Result.success(GlobalConstant.FINISHED) : Result.error(GlobalConstant.FAILED);
 
     }
+
+    @GetMapping("/list")
+    public Result<List<Dish>> getList(Dish dish) {
+        LambdaQueryWrapper<Dish> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(dish.getCategoryId() != null, Dish::getCategoryId, dish.getCategoryId())
+                .eq(dish.getStatus()!=null,Dish::getStatus,dish.getStatus())
+                .orderByAsc(Dish::getSort)
+                .orderByDesc(Dish::getUpdateTime);
+        List<Dish> list = dishService.list(queryWrapper);
+        return Result.success(list);
+    }
+
 }

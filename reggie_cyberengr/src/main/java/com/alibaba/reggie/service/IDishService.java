@@ -1,7 +1,7 @@
 package com.alibaba.reggie.service;
 
 import com.alibaba.reggie.entity.Dish;
-import com.alibaba.reggie.entity.DishDto;
+import com.alibaba.reggie.dto.DishDto;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 /**
