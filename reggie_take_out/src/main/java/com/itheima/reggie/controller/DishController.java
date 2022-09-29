@@ -3,6 +3,7 @@ package com.itheima.reggie.controller;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.itheima.reggie.common.CustomException;
 import com.itheima.reggie.common.GlobalConstant;
 import com.itheima.reggie.common.R;
 import com.itheima.reggie.dto.DishDto;
@@ -150,5 +151,23 @@ public class DishController {
         queryWrapper.orderByAsc(Dish::getSort).orderByDesc(Dish::getUpdateTime);
         List<Dish> list = dishService.list(queryWrapper);
         return R.success(list);
+    }
+
+    /**
+     * 根据id删除菜品
+     */
+    @DeleteMapping
+    public R<String> delete(@RequestParam List<Long> ids) {
+        log.info("前后端联通");
+        if (ids != null) {
+            for (Long id : ids) {
+                Dish dishId = dishService.getById(id);
+                if (dishId.getStatus() == 1) {
+                    throw new CustomException("该菜品为起售菜品，不能被删除");
+                }
+                dishService.removeByIds(ids);
+            }
+        }
+        return R.success(GlobalConstant.FINISH);
     }
 }
