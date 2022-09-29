@@ -10,6 +10,9 @@ public class GlobalConstant {
     //获取登录用户在Session中的key
     public static final String EMPLOYEE_KEY = "employee";
 
+    //获取登录用户在Session中的key
+    public static final String MOBILE_KEY = "user";
+
     /**
      * 操作成功
      */

@@ -26,4 +26,6 @@ public class BaseContext {
         // 获取我们写入的值
         return THREAD_LOCAL_CURRENT_USER.get();
     }
+
+
 }

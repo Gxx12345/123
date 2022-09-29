@@ -63,28 +63,50 @@ public class SetmealController {
      */
     @GetMapping("/page")
     public R<Page<SetmealDto>> page(Integer page, Integer pageSize, String name) {
+        // 组建分页对象
         Page<Setmeal> setmealPage = new Page<>(page, pageSize);
 
+        // 组建查询条件
         LambdaQueryWrapper<Setmeal> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(StringUtils.isNotEmpty(name), Setmeal::getName, name);
+        queryWrapper.like(StringUtils.isNotEmpty(name), Setmeal::getName, name);
         queryWrapper.orderByDesc(Setmeal::getUpdateTime);
 
-        iSetmealService.page(setmealPage,queryWrapper);
+        iSetmealService.page(setmealPage, queryWrapper);
 
+        // 定义返回结果
         Page<SetmealDto> result = new Page<>();
-        BeanUtils.copyProperties(setmealPage,result,"records");
+        // 转化结果为dto
+        BeanUtils.copyProperties(setmealPage, result, "records");
 
+        // 初始化dtoList
+        // 查询分类数据
         List<SetmealDto> setmealDtoList = setmealPage.getRecords().stream().map(item -> {
+            // 赋值
             SetmealDto setmealDto = new SetmealDto();
             BeanUtils.copyProperties(item, setmealDto);
-            Category category = iCategoryService.getById(item.getCategoryId());
+            // 查询分类
+            Category category = iCategoryService.getById(setmealDto.getCategoryId());
             if (category != null) {
                 setmealDto.setCategoryName(category.getName());
             }
             return setmealDto;
         }).collect(Collectors.toList());
 
+        // 赋值
         result.setRecords(setmealDtoList);
         return R.success(result);
+    }
+
+
+    /**
+     * 删除套餐
+     * @param ids
+     * @return
+     */
+    @DeleteMapping
+    public R<String> deleteByIds(@RequestParam List<Long> ids) {
+        iSetmealService.deleteByIds(ids);
+
+        return R.success(GlobalConstant.FINISH);
     }
 }

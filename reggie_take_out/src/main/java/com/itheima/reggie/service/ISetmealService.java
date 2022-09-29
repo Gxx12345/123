@@ -5,6 +5,8 @@ import com.itheima.reggie.dto.SetmealDto;
 import com.itheima.reggie.entity.Setmeal;
 import com.itheima.reggie.entity.SetmealDish;
 
+import java.util.List;
+
 /**
  * 套餐菜品业务层
  *
@@ -18,4 +20,11 @@ public interface ISetmealService extends IService<Setmeal> {
      * @param setmealDto
      */
     void saveWithDish(SetmealDto setmealDto);
+
+
+    /**
+     * 删除套餐
+     * @param ids
+     */
+    void deleteByIds(List<Long> ids);
 }

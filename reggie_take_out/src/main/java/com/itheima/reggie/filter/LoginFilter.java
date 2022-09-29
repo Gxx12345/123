@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.itheima.reggie.common.BaseContext;
 import com.itheima.reggie.common.GlobalConstant;
 import com.itheima.reggie.common.R;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.AntPathMatcher;
 
 import javax.servlet.*;
@@ -13,6 +14,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 
+@Slf4j
 @WebFilter(filterName = "loginFilter", urlPatterns = "/*")
 public class LoginFilter implements Filter {
 
@@ -33,8 +35,11 @@ public class LoginFilter implements Filter {
                 "/front/**",
                 "/employee/login",
                 "/employee/logout",
-                "/common/**"
+                "/common/**",
+                "/user/sendMsg",
+                "/user/login"
         };
+
 
         //对比传进来的路径和需要过滤的路径是否匹配
         for (String uri : uris) {
@@ -42,7 +47,7 @@ public class LoginFilter implements Filter {
 
             if (match) {
                 //匹配 ， 直接放行
-                filterChain.doFilter(request, response);
+                filterChain.doFilter(servletRequest, servletResponse);
                 return;
             }
         }
@@ -54,14 +59,35 @@ public class LoginFilter implements Filter {
             // 获取到当前登陆对象ID并传入ThreadLocal包装类中以便使用
             BaseContext.setCurrentUserId(ID);
             //不为null直接放行
-            filterChain.doFilter(request, response);
+            filterChain.doFilter(servletRequest, servletResponse);
             return;
         }
 
+
+        // 移动端的判断逻辑
+        Long userId = (Long) request.getSession().getAttribute(GlobalConstant.MOBILE_KEY);
+        // 到session中取值,如果取到了,就代表这个用户已经登录了
+        // 用户ID不为空,代表已登录
+        if (userId != null) {
+            // 放行
+            // 当前线程ID
+            // 如果当前用户已登录,那么需要把当前用户登录的ID,放入到Threadlocal中,以便在后续的线程调用中使用相关的值
+            BaseContext.setCurrentUserId(userId);
+            filterChain.doFilter(servletRequest, servletResponse);
+            return;
+        }
+        // 如果没取到,代表未登录
+        // 5、如果未登录则返回未登录结果
+        String notlogin = JSON.toJSONString(R.error("NOTLOGIN"));
+        response.getWriter().write(notlogin);
 
         //Session为null，返回前端数据，该用户未登录
         String notLogin = JSON.toJSONString(R.error("NOTLOGIN"));
         response.getWriter().write(notLogin);
 
+
+
     }
+
+
 }
