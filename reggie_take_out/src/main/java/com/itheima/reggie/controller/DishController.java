@@ -170,4 +170,21 @@ public class DishController {
         }
         return R.success(GlobalConstant.FINISH);
     }
+
+    /**
+     * 菜品的状态修改
+     * @param status
+     * @param ids
+     * @return
+     */
+    @PostMapping("/status/{status}")
+    public R<String> status(@PathVariable Integer status,@RequestParam List<Long> ids) {
+        log.info("前后端联通");
+        for (Long id : ids) {
+            Dish byId = dishService.getById(id);
+            byId.setStatus(status);
+            dishService.updateById(byId);
+        }
+        return R.success(GlobalConstant.FINISH);
+    }
 }
