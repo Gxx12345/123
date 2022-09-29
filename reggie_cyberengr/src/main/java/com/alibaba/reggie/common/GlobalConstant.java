@@ -16,6 +16,10 @@ public interface GlobalConstant {
      */
     String USER_KEY = "user";
     /**
+     * 用户当前的状态
+     */
+    String STATUS = "status";
+    /**
      * 操作成功变量
      */
     String FINISHED="操作成功";
@@ -23,4 +27,5 @@ public interface GlobalConstant {
      * 操作失败变量
      */
     String FAILED="操作失败";
+
 }

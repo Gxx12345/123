@@ -55,6 +55,10 @@ public class UserController {
             user.setStatus(1);
             userService.save(user);
         }
+        if (0 == user.getStatus()) {
+            return Result.error("账号已禁用");
+        }
+        //设置session值
         session.setAttribute(GlobalConstant.USER_KEY, user.getId());
         return Result.success(user);
     }

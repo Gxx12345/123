@@ -133,7 +133,8 @@ public class EmployeeController {
         Long id = (Long) request.getSession().getAttribute(GlobalConstant.EMPLOYEE_KEY);
         employeeParam.setUpdateUser(id);*/
         //endregion
-        if (employeeParam.getId() == null) {
+        Long attribute = (Long) request.getSession().getAttribute(GlobalConstant.EMPLOYEE_KEY);
+        if (employeeParam.getId() == null || employeeParam.getId() == attribute) {
             return Result.error(GlobalConstant.FAILED);
         }
         boolean update = service.updateById(employeeParam);
@@ -148,7 +149,7 @@ public class EmployeeController {
      */
     @GetMapping("/{id}")
     public Result<Employee> selectById(@PathVariable Long id) {
-        Employee employee=null;
+        Employee employee = null;
         if (id == null || (employee = service.getById(id)) == null) {
             return Result.error(GlobalConstant.FAILED);
         }

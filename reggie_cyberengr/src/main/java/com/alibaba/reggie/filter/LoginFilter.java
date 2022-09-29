@@ -12,6 +12,7 @@ import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+
 @Slf4j
 @WebFilter(filterName = "loginFilter", urlPatterns = "/*")
 public class LoginFilter implements Filter {
@@ -25,16 +26,16 @@ public class LoginFilter implements Filter {
         HttpServletResponse response = (HttpServletResponse) servletResponse;
         //请求获取URI信息
         String requestURI = request.getRequestURI();
-        log.info("拦截到请求"+requestURI);
+        log.info("拦截到请求" + requestURI);
         //定义不用拦截的路径,进行判断
         String[] uris = {
                 "/backend/**", "/front/**",
                 "/employee/login", "/employee/logout",
-                "/user/sendMsg","/user/login",
+                "/user/sendMsg", "/user/login",
                 "/common/**"};
         for (String uri : uris) {
             //AntPathMatcher路径匹配器对象的match方法比较路径
-            if (MATCHER.match(uri,requestURI)) {
+            if (MATCHER.match(uri, requestURI)) {
                 filterChain.doFilter(servletRequest, servletResponse);
                 return;
             }
