@@ -135,6 +135,7 @@ public class DishController {
 
     /**
      * 根据id查询菜品信息和对应的口味信息
+     *
      * @param id
      */
     @GetMapping("/{id}")
@@ -146,6 +147,7 @@ public class DishController {
 
     /**
      * 更新菜品信息，同时更新对应的口味信息
+     *
      * @param dishDtoParam
      * @return
      */
@@ -154,6 +156,24 @@ public class DishController {
 
         iDishService.updateWithFlavor(dishDtoParam);
         return R.success(GlobalConstant.FINISH);
+    }
 
+    /**
+     * 根据条件查询对应的菜品数据
+     * @param dish
+     * @return
+     */
+    @GetMapping("/list")
+    public R<List<Dish>> list(Dish dish) {
+        Long categoryId = dish.getCategoryId();
+
+        //构造查询条件
+        LambdaQueryWrapper<Dish> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(categoryId != null , Dish::getCategoryId, categoryId);
+        //添加条件，查询状态为1（起售状态）的菜品
+        queryWrapper.eq(Dish::getStatus,1);
+        List<Dish> dishList = iDishService.list(queryWrapper);
+
+        return R.success(dishList);
     }
 }
