@@ -1,7 +1,6 @@
 package com.alibaba.reggie.service.impl;
 
 import com.alibaba.reggie.common.CustomException;
-import com.alibaba.reggie.common.Result;
 import com.alibaba.reggie.dto.SetmealDto;
 import com.alibaba.reggie.entity.Category;
 import com.alibaba.reggie.entity.Setmeal;
@@ -11,6 +10,7 @@ import com.alibaba.reggie.service.ICategoryService;
 import com.alibaba.reggie.service.ISetmealDishService;
 import com.alibaba.reggie.service.ISetmealService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.apache.commons.lang.StringUtils;
@@ -18,7 +18,6 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -80,11 +79,8 @@ public class SetmealServiceImpl extends ServiceImpl<SetmealMapper, Setmeal> impl
     @Override
     @Transactional
     public void deleteByIds(List<Long> ids) {
-        if (CollectionUtils.isEmpty(ids)) {
-            throw new CustomException("传入的参数有误!");
-        }
         LambdaQueryWrapper<Setmeal> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.in(Setmeal::getId, ids)
+        queryWrapper.in(CollectionUtils.isNotEmpty(ids),Setmeal::getId, ids)
                 .eq(Setmeal::getStatus, 1);
         if (count(queryWrapper) > 0) {
             throw new CustomException("套餐正在售卖中，不能删除!");
