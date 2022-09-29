@@ -9,13 +9,13 @@ import com.alibaba.reggie.mapper.DishMapper;
 import com.alibaba.reggie.service.IDishFlavorService;
 import com.alibaba.reggie.service.IDishService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -88,11 +88,17 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements ID
      */
     @Transactional
     @Override
-    public void deleteByIds(Long[] ids) {
+    public void deleteByIds(List<Long> ids) {
+        LambdaQueryWrapper<Dish> wrapper = new LambdaQueryWrapper<>();
+        wrapper.in(CollectionUtils.isNotEmpty(ids),Dish::getId,ids)
+                .eq(Dish::getStatus,1);
+        if (this.count(wrapper) > 0) {
+            throw new CustomException("菜品在售出状态,无法删除!");
+        }
+        LambdaQueryWrapper<DishFlavor> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.in(CollectionUtils.isNotEmpty(ids),DishFlavor::getDishId,ids);
         try {
-            this.removeByIds(Arrays.asList(ids));
-            LambdaQueryWrapper<DishFlavor> queryWrapper = new LambdaQueryWrapper<>();
-            queryWrapper.in(DishFlavor::getDishId,ids);
+            this.removeByIds(ids);
             dishFlavorService.remove(queryWrapper);
         } catch (Exception e) {
             e.printStackTrace();

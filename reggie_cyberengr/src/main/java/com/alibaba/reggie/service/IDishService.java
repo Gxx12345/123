@@ -4,6 +4,8 @@ import com.alibaba.reggie.entity.Dish;
 import com.alibaba.reggie.dto.DishDto;
 import com.baomidou.mybatisplus.extension.service.IService;
 
+import java.util.List;
+
 /**
  * 菜品
  *
@@ -30,5 +32,5 @@ public interface IDishService extends IService<Dish> {
      */
     void updateWithFlavor(DishDto dishDto);
 
-    void deleteByIds(Long[] ids);
+    void deleteByIds(List<Long> ids);
 }

@@ -7,12 +7,14 @@ import com.alibaba.reggie.dto.SetmealDto;
 import com.alibaba.reggie.entity.Setmeal;
 import com.alibaba.reggie.service.ISetmealService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * SetmealController
@@ -50,11 +52,10 @@ public class SetmealController {
 
     @PostMapping("/status/{status}")
     public Result<String> updateStatus(@PathVariable Integer status,@RequestParam List<Long> ids) {
-        LambdaQueryWrapper<Setmeal> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.in(CollectionUtils.isNotEmpty(ids),Setmeal::getId,ids);
-        Setmeal setmeal = new Setmeal();
-        setmeal.setStatus(status);
-        this.setmealService.update(setmeal,queryWrapper);
+        LambdaUpdateWrapper<Setmeal> updateWrapper = new LambdaUpdateWrapper<>();
+        updateWrapper.in(CollectionUtils.isNotEmpty(ids),Setmeal::getId,ids)
+                    .set(Setmeal::getStatus,status);
+        this.setmealService.update(updateWrapper);
         return Result.success(GlobalConstant.FINISHED);
     }
 }

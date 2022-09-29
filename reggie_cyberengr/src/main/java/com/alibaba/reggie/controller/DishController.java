@@ -8,6 +8,7 @@ import com.alibaba.reggie.dto.DishDto;
 import com.alibaba.reggie.service.ICategoryService;
 import com.alibaba.reggie.service.IDishService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.BeanUtils;
@@ -121,10 +122,7 @@ public class DishController {
      * @return
      */
     @DeleteMapping
-    public Result<String> deleteByIds(Long[] ids) {
-        if (ids.length == 0) {
-            return Result.error(GlobalConstant.FAILED);
-        }
+    public Result<String> deleteByIds(@RequestParam List<Long> ids) {
         dishService.deleteByIds(ids);
         return Result.success(GlobalConstant.FINISHED);
     }
@@ -141,11 +139,10 @@ public class DishController {
         if (status == null || ids.length == 0) {
             return Result.error(GlobalConstant.FAILED);
         }
-        LambdaQueryWrapper<Dish> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.in(Dish::getId, ids);
-        Dish dish = new Dish();
-        dish.setStatus(status);
-        boolean update = dishService.update(dish, queryWrapper);
+        LambdaUpdateWrapper<Dish> updateWrapper = new LambdaUpdateWrapper<>();
+        updateWrapper.in(Dish::getId, ids)
+                    .set(Dish::getStatus,status);
+        boolean update = dishService.update(updateWrapper);
         return update ? Result.success(GlobalConstant.FINISHED) : Result.error(GlobalConstant.FAILED);
 
     }
