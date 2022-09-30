@@ -42,18 +42,19 @@ public class LoginFilter implements Filter {
         }
         //根据session值取得employeeId,判断id是否为null
         Long employeeId = (Long) request.getSession().getAttribute(GlobalConstant.EMPLOYEE_KEY);
-        //存放当前登录用户到ThreadLocal
-        BaseContext.setSetThreadLocalCurrentId(employeeId);
+
         if (null != employeeId) {
+            //存放当前登录用户到ThreadLocal
+            BaseContext.setSetThreadLocalCurrentId(employeeId);
             filterChain.doFilter(servletRequest, servletResponse);
             return;
         }
 
         //根据session值取得userId,判断userId是否为null
         Long userId = (Long) request.getSession().getAttribute(GlobalConstant.USER_KEY);
-        //存放当前登录用户到ThreadLocal
-        BaseContext.setSetThreadLocalCurrentId(userId);
         if (null != userId) {
+            //存放当前登录用户到ThreadLocal
+            BaseContext.setSetThreadLocalCurrentId(userId);
             filterChain.doFilter(servletRequest, servletResponse);
             return;
         }
