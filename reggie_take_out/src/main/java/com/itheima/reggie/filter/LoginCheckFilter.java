@@ -37,7 +37,8 @@ public class LoginCheckFilter implements Filter {
                 "/employee/logout",
                 "/backend/**",
                 "/front/**",
-                "/common/**"
+                "/common/**",
+                "/user/sendMsg","/user/login"
         };
 
         for (String url : urls) {
@@ -59,6 +60,16 @@ public class LoginCheckFilter implements Filter {
             return;
         }
 
+        //移动端登录判断
+        Long userId = (Long) request.getSession().getAttribute(GlobalConstant.MOBILE_KEY);
+        if(userId != null){
+            //如果当前用户已登录，那么需要把当前用户登录的ID，放入到Threadlocal中，以便在后续的线程调用中使用相关的值
+            BaseContext.setCurrentId(userId);
+
+            log.info("用户已登录，用户id为：{}",request.getSession().getAttribute(GlobalConstant.MOBILE_KEY));
+            filterChain.doFilter(request,response);
+            return;
+        }
         log.info("用户未登录");
         //5、如果未登录则返回未登录结果，通过输出流方式向客户端页面响应数据
         response.getWriter().write(JSON.toJSONString(R.error("NOTLOGIN")));

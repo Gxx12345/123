@@ -1,7 +1,10 @@
 package com.itheima.reggie.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.itheima.reggie.dto.SetmealDto;
 import com.itheima.reggie.entity.Setmeal;
+
+import java.util.List;
 
 /**
  * 套餐
@@ -10,4 +13,15 @@ import com.itheima.reggie.entity.Setmeal;
  * @since 2022/9/26 17:41
  */
 public interface ISetmealService extends IService<Setmeal> {
+    /**
+     * 添加套餐
+     * @param dto
+     */
+    void saveWithDish(SetmealDto dto);
+
+    /**
+     * 删除套餐
+     * @param ids
+     */
+    void removeWithDish(List<Long> ids);
 }

@@ -66,7 +66,7 @@ public class CategoryController {
         queryPage.setSize(pageSize);
         LambdaQueryWrapper<Category> queryWrapper = new LambdaQueryWrapper<>();
         //根据sort升序排列
-        queryWrapper.orderByDesc(Category::getSort);
+        queryWrapper.orderByAsc(Category::getSort);
         Page<Category> categoryPage = this.categoryService.page(queryPage, queryWrapper);
         return R.success(categoryPage);
     }

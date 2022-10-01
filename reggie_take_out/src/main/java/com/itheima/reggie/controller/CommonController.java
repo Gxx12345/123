@@ -76,7 +76,7 @@ public class CommonController {
             //关闭资源
             fileInputStream.close();
             outputStream.close();
-        } catch (IOException e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }

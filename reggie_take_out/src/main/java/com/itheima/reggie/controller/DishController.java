@@ -8,8 +8,11 @@ import com.itheima.reggie.common.R;
 import com.itheima.reggie.dto.DishDto;
 import com.itheima.reggie.entity.Category;
 import com.itheima.reggie.entity.Dish;
+import com.itheima.reggie.entity.DishFlavor;
 import com.itheima.reggie.service.ICategoryService;
+import com.itheima.reggie.service.IDishFlavorService;
 import com.itheima.reggie.service.IDishService;
+import com.itheima.reggie.service.ISetmealDishService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +36,9 @@ public class DishController {
 
     @Autowired
     private ICategoryService categoryService;
+
+    @Autowired
+    private IDishFlavorService dishFlavorService;
 
     @PostMapping
     public R<String> save(@RequestBody DishDto dishDto){
@@ -95,5 +101,77 @@ public class DishController {
         log.info("dishDto ==> {}",dishDto.toString());
         this.iDishService.updateWithFlavor(dishDto);
         return R.success("修改菜品成功");
+    }
+
+    /**
+     * 根据分类ID查询菜品
+     */
+    @GetMapping("/list")
+    //region 不查询口味的方法
+    // public R<List<Dish>> getByCategoryId(Dish dish){
+    //     Long categoryId = dish.getCategoryId();
+    //     LambdaQueryWrapper<Dish> queryWrapper = new LambdaQueryWrapper<>();
+    //     queryWrapper.eq(Dish::getCategoryId,categoryId);
+    //     queryWrapper.eq(Dish::getStatus,1);
+    //     List<Dish> dishList = this.iDishService.list(queryWrapper);
+    //     return R.success(dishList);
+    // }
+    //endregion
+    //查询菜品方法修改
+    public R<List<DishDto>> list(Dish dish) {
+        //构造查询条件
+        LambdaQueryWrapper<Dish> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(dish.getCategoryId() != null, Dish::getCategoryId, dish.getCategoryId());
+        //添加条件，查询状态为1（起售状态）的菜品
+        queryWrapper.eq(Dish::getStatus, 1);
+        //添加排序条件
+        queryWrapper.orderByAsc(Dish::getSort).orderByDesc(Dish::getUpdateTime);
+
+        List<Dish> list = this.iDishService.list(queryWrapper);
+
+        //region foreach写法
+        List<DishDto> dishDtoList = new ArrayList<>();
+        for (Dish item : list) {
+            DishDto dishDto = new DishDto();
+            BeanUtils.copyProperties(item, dishDto);
+            Long categoryId = item.getCategoryId();//分类id
+            //根据id查询分类对象
+            Category category = categoryService.getById(categoryId);
+            if (category != null) {
+                String categoryName = category.getName();
+                dishDto.setCategoryName(categoryName);
+            }
+            //当前菜品的id
+            Long dishId = item.getId();
+            LambdaQueryWrapper<DishFlavor> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+            lambdaQueryWrapper.eq(DishFlavor::getDishId, dishId);
+            //SQL:select * from dish_flavor where dish_id = ?
+            List<DishFlavor> dishFlavorList = dishFlavorService.list(lambdaQueryWrapper);
+            dishDto.setFlavors(dishFlavorList);
+            dishDtoList.add(dishDto);
+        }
+        //endregion
+        //region Lambda使用Map方法的写法
+        //        List<DishDto> dishDtoList = list.stream().map((item) -> {
+//            DishDto dishDto = new DishDto();
+//            BeanUtils.copyProperties(item,dishDto);
+//            Long categoryId = item.getCategoryId();//分类id
+//            //根据id查询分类对象
+//            Category category = categoryService.getById(categoryId);
+//            if(category != null){
+//                String categoryName = category.getName();
+//                dishDto.setCategoryName(categoryName);
+//            }
+//            //当前菜品的id
+//            Long dishId = item.getId();
+//            LambdaQueryWrapper<DishFlavor> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+//            lambdaQueryWrapper.eq(DishFlavor::getDishId,dishId);
+//            //SQL:select * from dish_flavor where dish_id = ?
+//            List<DishFlavor> dishFlavorList = dishFlavorService.list(lambdaQueryWrapper);
+//            dishDto.setFlavors(dishFlavorList);
+//            return dishDto;
+//        }).collect(Collectors.toList());
+        //endregion
+        return R.success(dishDtoList);
     }
 }
