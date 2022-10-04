@@ -1,14 +1,19 @@
 package com.alibaba.reggie.controller;
 
+import com.alibaba.reggie.common.BaseContext;
 import com.alibaba.reggie.common.GlobalConstant;
 import com.alibaba.reggie.common.Result;
 import com.alibaba.reggie.dto.DishDto;
+import com.alibaba.reggie.dto.OrderDto;
 import com.alibaba.reggie.entity.Category;
 import com.alibaba.reggie.entity.Dish;
+import com.alibaba.reggie.entity.OrderDetail;
 import com.alibaba.reggie.entity.Orders;
+import com.alibaba.reggie.service.IOrderDetailService;
 import com.alibaba.reggie.service.IOrderService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.extern.slf4j.Slf4j;
@@ -33,10 +38,11 @@ import java.util.stream.Collectors;
 public class OrderController {
     @Autowired
     private IOrderService orderService;
+    @Autowired
+    private IOrderDetailService orderDetailService;
 
     /**
      * 用户下单
-     *
      * @param orders
      * @return
      */
@@ -55,7 +61,7 @@ public class OrderController {
      * @return
      */
     @GetMapping("/userPage")
-    public Result<Page<Orders>> pageResult(Integer page, Integer pageSize) {
+    public Result<Page<OrderDto>> pageResult(Integer page, Integer pageSize) {
         if (page == null || pageSize == null) {
             return Result.error(GlobalConstant.FAILED);
         }
@@ -63,10 +69,29 @@ public class OrderController {
         ordersPage.setCurrent(page);
         ordersPage.setSize(pageSize);
         LambdaQueryWrapper<Orders> lambdaQueryWrapper = new LambdaQueryWrapper<>();
-        lambdaQueryWrapper.orderByDesc(Orders::getCheckoutTime)
+        lambdaQueryWrapper.eq(Orders::getUserId, BaseContext.getSetThreadLocalCurrentId())
+                .orderByDesc(Orders::getCheckoutTime)
                 .orderByDesc(Orders::getOrderTime);
         orderService.page(ordersPage, lambdaQueryWrapper);
-        return Result.success(ordersPage);
+        Page<OrderDto> result = new Page<>(page, pageSize);
+        // 没有查询到记录的话,直接返回
+        if (CollectionUtils.isEmpty(ordersPage.getRecords())) {
+            return Result.success(result);
+        }
+        BeanUtils.copyProperties(ordersPage, result, "records");
+        List<OrderDto> orderDtoList = ordersPage.getRecords().stream().map(item -> {
+            OrderDto dto = new OrderDto();
+            BeanUtils.copyProperties(item, dto);
+            // 查询子订单信息
+            LambdaQueryWrapper<OrderDetail> orderDetailWrapper = new LambdaQueryWrapper<>();
+            orderDetailWrapper.eq(OrderDetail::getOrderId, item.getId());
+            // 子订单数据
+            List<OrderDetail> orderDetails = this.orderDetailService.list(orderDetailWrapper);
+            dto.setOrderDetails(orderDetails);
+            return dto;
+        }).collect(Collectors.toList());
+        result.setRecords(orderDtoList);
+        return Result.success(result);
     }
 
     /**
