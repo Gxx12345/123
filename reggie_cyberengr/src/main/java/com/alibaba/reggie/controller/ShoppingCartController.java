@@ -4,12 +4,9 @@ import com.alibaba.reggie.common.BaseContext;
 import com.alibaba.reggie.common.CustomException;
 import com.alibaba.reggie.common.GlobalConstant;
 import com.alibaba.reggie.common.Result;
-import com.alibaba.reggie.entity.AddressBook;
-import com.alibaba.reggie.entity.Orders;
 import com.alibaba.reggie.entity.ShoppingCart;
 import com.alibaba.reggie.service.IShoppingCartService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.extension.api.R;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +30,7 @@ public class ShoppingCartController {
 
     /**
      * 添加购物车
+     *
      * @param shoppingCartParam
      * @return
      */
@@ -71,14 +69,15 @@ public class ShoppingCartController {
 
     /**
      * 查看购物车
+     *
      * @return
      */
     @GetMapping("/list")
-    public Result<List<ShoppingCart>> list(){
+    public Result<List<ShoppingCart>> list() {
         log.info("查看购物车...");
 
         LambdaQueryWrapper<ShoppingCart> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(ShoppingCart::getUserId,BaseContext.getSetThreadLocalCurrentId());
+        queryWrapper.eq(ShoppingCart::getUserId, BaseContext.getSetThreadLocalCurrentId());
         queryWrapper.orderByAsc(ShoppingCart::getCreateTime);
 
         List<ShoppingCart> list = shoppingCartService.list(queryWrapper);
@@ -88,13 +87,14 @@ public class ShoppingCartController {
 
     /**
      * 清空购物车
+     *
      * @return
      */
     @DeleteMapping("/clean")
-    public Result<String> clean(){
+    public Result<String> clean() {
         //SQL:delete from shopping_cart where user_id = ?
         LambdaQueryWrapper<ShoppingCart> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(ShoppingCart::getUserId,BaseContext.getSetThreadLocalCurrentId());
+        queryWrapper.eq(ShoppingCart::getUserId, BaseContext.getSetThreadLocalCurrentId());
 
         shoppingCartService.remove(queryWrapper);
         return Result.success("清空购物车成功");
@@ -102,11 +102,12 @@ public class ShoppingCartController {
 
     /**
      * 删除购物
+     *
      * @param shoppingCartParam
      * @return
      */
     @PostMapping("/sub")
-    public Result<String> update(@RequestBody ShoppingCart shoppingCartParam) {
+    public Result<ShoppingCart> update(@RequestBody ShoppingCart shoppingCartParam) {
         //查询当前用户的购物车中是否有此菜品或套餐的数据
         LambdaQueryWrapper<ShoppingCart> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(ShoppingCart::getUserId, BaseContext.getSetThreadLocalCurrentId());
@@ -120,15 +121,16 @@ public class ShoppingCartController {
         }
         ShoppingCart shoppingCart = this.shoppingCartService.getOne(queryWrapper);
         //如果存在,就在原来的数量基础上减一
-        if (shoppingCart != null) {
+        if (shoppingCart.getNumber() > 0) {
             shoppingCart.setNumber(shoppingCart.getNumber() - 1);
+            // 更新数据
+            this.shoppingCartService.updateById(shoppingCart);
             if (shoppingCart.getNumber() == 0) {
                 this.shoppingCartService.remove(queryWrapper);
             }
-            // 更新数据
-            this.shoppingCartService.updateById(shoppingCart);
+            return Result.success(shoppingCart);
         }
-        return Result.success(GlobalConstant.FINISHED);
+        return Result.error(GlobalConstant.FAILED);
     }
 
 }

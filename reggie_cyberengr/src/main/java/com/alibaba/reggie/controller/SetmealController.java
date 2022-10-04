@@ -4,18 +4,22 @@ import com.alibaba.reggie.common.CustomException;
 import com.alibaba.reggie.common.GlobalConstant;
 import com.alibaba.reggie.common.Result;
 import com.alibaba.reggie.dto.SetmealDto;
+import com.alibaba.reggie.entity.Dish;
 import com.alibaba.reggie.entity.Setmeal;
+import com.alibaba.reggie.entity.SetmealDish;
+import com.alibaba.reggie.service.IDishService;
+import com.alibaba.reggie.service.ISetmealDishService;
 import com.alibaba.reggie.service.ISetmealService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.extension.api.R;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Set;
 
 /**
  * SetmealController
@@ -29,7 +33,8 @@ public class SetmealController {
 
     @Autowired
     private ISetmealService setmealService;
-
+    @Autowired
+    private ISetmealDishService setmealDishService;
     @PostMapping
     public Result<String> addSetmealDto(@RequestBody SetmealDto setmealDto) {
         setmealService.saveWithDish(setmealDto);
@@ -77,12 +82,18 @@ public class SetmealController {
         return Result.success(list);
     }
 
-    @GetMapping("/dish/{id}")
-    public Result<Setmeal> getSetmealDto(@PathVariable Long id) {
+    @GetMapping("/{id}")
+    public Result<SetmealDto> getSetmealDto(@PathVariable Long id) {
         if (id == null) {
             return Result.error("传入参数有误!");
         }
         Setmeal setmeal = setmealService.getById(id);
-        return Result.success(setmeal);
+        LambdaQueryWrapper<SetmealDish> wrapper=new LambdaQueryWrapper();
+        wrapper.in(SetmealDish::getSetmealId,id);
+        List<SetmealDish> list = setmealDishService.list(wrapper);
+        SetmealDto setmealDto = new SetmealDto();
+        BeanUtils.copyProperties(setmeal,setmealDto);
+        setmealDto.setSetmealDishes(list);
+        return Result.success(setmealDto);
     }
 }
