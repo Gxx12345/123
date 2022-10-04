@@ -16,6 +16,16 @@
 <dependencies>
 
     <dependency>
+        <groupId>org.hibernate.validator</groupId>
+        <artifactId>hibernate-validator</artifactId>
+    </dependency>
+
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-data-redis</artifactId>
+    </dependency>
+
+    <dependency>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter</artifactId>
     </dependency>
@@ -28,14 +38,47 @@
 
     <dependency>
         <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-configuration-processor</artifactId>
+    </dependency>
+
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-web</artifactId>
         <scope>compile</scope>
+    </dependency>
+    <!--        mp的代码生成器-->
+    <dependency>
+        <groupId>com.baomidou</groupId>
+        <artifactId>mybatis-plus-generator</artifactId>
+        <version>3.4.1</version>
+    </dependency>
+    <!--        模板引擎-->
+    <dependency>
+        <groupId>org.apache.velocity</groupId>
+        <artifactId>velocity-engine-core</artifactId>
+        <version>2.3</version>
+    </dependency>
+    <dependency>
+        <groupId>com.aliyun</groupId>
+        <artifactId>aliyun-java-sdk-core</artifactId>
+        <version>4.5.16</version>
+    </dependency>
+    <dependency>
+        <groupId>com.aliyun</groupId>
+        <artifactId>aliyun-java-sdk-dysmsapi</artifactId>
+        <version>2.1.0</version>
     </dependency>
 
     <dependency>
         <groupId>com.baomidou</groupId>
         <artifactId>mybatis-plus-boot-starter</artifactId>
         <version>3.4.2</version>
+    </dependency>
+
+    <dependency>
+        <groupId>cn.hutool</groupId>
+        <artifactId>hutool-all</artifactId>
+        <version>4.5.15</version>
     </dependency>
 
     <dependency>
@@ -61,28 +104,32 @@
         <artifactId>mysql-connector-java</artifactId>
         <scope>runtime</scope>
     </dependency>
-<!-- 连接池用的德鲁伊 -->
+
+    <!-- 德鲁伊连接池-->
     <dependency>
         <groupId>com.alibaba</groupId>
         <artifactId>druid-spring-boot-starter</artifactId>
         <version>1.1.23</version>
     </dependency>
 
+    <!-- Dozer -->
     <dependency>
-        <groupId>com.aliyun</groupId>
-        <artifactId>aliyun-java-sdk-core</artifactId>
-        <version>4.5.16</version>
+        <groupId>com.github.dozermapper</groupId>
+        <artifactId>dozer-core</artifactId>
+        <version>6.5.2</version>
     </dependency>
+
     <dependency>
-        <groupId>com.aliyun</groupId>
-        <artifactId>aliyun-java-sdk-dysmsapi</artifactId>
-        <version>2.1.0</version>
+        <groupId>com.github.xiaoymin</groupId>
+        <artifactId>knife4j-spring-boot-starter</artifactId>
+        <version>3.0.2</version>
     </dependency>
+</dependencies>
 
 
 
     <!-- springBoot 打成jar包,之后使用 -jar运行时的依赖-->
-</dependencies>
+
     <build>
         <plugins>
             <plugin>

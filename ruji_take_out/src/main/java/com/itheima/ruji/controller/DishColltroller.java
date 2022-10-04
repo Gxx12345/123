@@ -1,16 +1,25 @@
 package com.itheima.ruji.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.itheima.ruji.common.AntPathmathcherSS;
+import com.itheima.ruji.common.CustomException;
 import com.itheima.ruji.common.R;
 import com.itheima.ruji.dto.DishDto;
 import com.itheima.ruji.entity.Category;
 import com.itheima.ruji.entity.Dish;
+import com.itheima.ruji.entity.DishFlavor;
 import com.itheima.ruji.service.ICategoryService;
+import com.itheima.ruji.service.IDishFlavorService;
 import com.itheima.ruji.service.IDishService;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
+import jdk.nashorn.internal.runtime.GlobalConstants;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
+import org.apache.ibatis.annotations.Delete;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -39,6 +48,8 @@ public class DishColltroller {
     private IDishService dishService;
     @Autowired
     private ICategoryService iCategoryService;
+    @Autowired
+    private IDishFlavorService iDishFlavorService;
     @PostMapping
     public R<String> save(@RequestBody DishDto dishDto){
         log.info("前后端联通");
@@ -136,6 +147,12 @@ public class DishColltroller {
         dtoPage.setRecords(dishDtoList);
         return R.success(dtoPage);
     }
+
+    /**
+     * 根据id查询回显
+     * @param id
+     * @return
+     */
     @GetMapping("/{id}")
     public R<DishDto> catgeoryId(@PathVariable Long id){
         if(id<=0){
@@ -144,6 +161,12 @@ public class DishColltroller {
         DishDto byIdWithFlavor = dishService.getByIdWithFlavor(id);
         return R.success(byIdWithFlavor);
     }
+
+    /**
+     * 修改
+     * @param dishDto
+     * @return
+     */
     @PutMapping
     public R<String> update(@RequestBody DishDto dishDto) {
         log.info("前后端联通");// controller -> service -> mapper
@@ -156,7 +179,7 @@ public class DishColltroller {
      * @param dish
      * @return
      */
-    @GetMapping("/list")
+   /* @GetMapping("/list")
     public R<List<Dish>>listDish(Dish dish){
         //拼接条件
         LambdaQueryWrapper<Dish> wrapper = new LambdaQueryWrapper<>();
@@ -170,4 +193,155 @@ public class DishColltroller {
         List<Dish> list = dishService.list(wrapper);
         return R.success(list);
     }
+*/
+
+    /**
+     * C端查询列表
+     * @param dish
+     * @return
+     */
+    @GetMapping("/list")
+    public R<List<DishDto>> list(Dish dish) {
+        //构造查询条件
+        LambdaQueryWrapper<Dish> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(dish.getCategoryId() != null, Dish::getCategoryId, dish.getCategoryId());
+        //添加条件，查询状态为1（起售状态）的菜品
+        queryWrapper.eq(Dish::getStatus, 1);
+        //添加排序条件
+        queryWrapper.orderByAsc(Dish::getSort).orderByDesc(Dish::getUpdateTime);
+
+        List<Dish> list = dishService.list(queryWrapper);
+
+        //region foreach写法
+        List<DishDto> dishDtoList = new ArrayList<>();
+        for (Dish item : list) {
+            DishDto dishDto = new DishDto();
+            BeanUtils.copyProperties(item, dishDto);
+            Long categoryId = item.getCategoryId();//分类id
+            //根据id查询分类对象
+            Category category = iCategoryService.getById(categoryId);
+            if (category != null) {
+                String categoryName = category.getName();
+                dishDto.setCategoryName(categoryName);
+            }
+            //当前菜品的id
+            Long dishId = item.getId();
+            LambdaQueryWrapper<DishFlavor> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+            lambdaQueryWrapper.eq(DishFlavor::getDishId, dishId);
+            //SQL:select * from dish_flavor where dish_id = ?
+            List<DishFlavor> dishFlavorList = iDishFlavorService.list(lambdaQueryWrapper);
+            dishDto.setFlavors(dishFlavorList);
+            dishDtoList.add(dishDto);
+        }
+        //endregion
+        //region Lambda使用Map方法的写法
+        //        List<DishDto> dishDtoList = list.stream().map((item) -> {
+//            DishDto dishDto = new DishDto();
+//            BeanUtils.copyProperties(item,dishDto);
+//            Long categoryId = item.getCategoryId();//分类id
+//            //根据id查询分类对象
+//            Category category = categoryService.getById(categoryId);
+//            if(category != null){
+//                String categoryName = category.getName();
+//                dishDto.setCategoryName(categoryName);
+//            }
+//            //当前菜品的id
+//            Long dishId = item.getId();
+//            LambdaQueryWrapper<DishFlavor> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+//            lambdaQueryWrapper.eq(DishFlavor::getDishId,dishId);
+//            //SQL:select * from dish_flavor where dish_id = ?
+//            List<DishFlavor> dishFlavorList = dishFlavorService.list(lambdaQueryWrapper);
+//            dishDto.setFlavors(dishFlavorList);
+//            return dishDto;
+//        }).collect(Collectors.toList());
+        //endregion
+        return R.success(dishDtoList);
+    }
+
+    /**
+     * 删除
+     * @param ids
+     * @return
+     */
+    @DeleteMapping
+    @ApiOperation(value = "删除菜品/批量删除菜品")
+    @ApiImplicitParam(name = "ids", value = "菜品id集合", required = true)
+    public R<String>deletes(@RequestParam List<Long>ids){
+        if (CollectionUtils.isEmpty(ids)) {
+            throw new CustomException(AntPathmathcherSS.ERROR);
+        }
+        LambdaQueryWrapper<Dish> wrapper = new LambdaQueryWrapper<>();
+        wrapper.in(Dish::getId,ids);
+        dishService.remove(wrapper);
+        return R.success(AntPathmathcherSS.FINISH);
+    }
+
+    /**
+     * 停售
+     * @param ids
+     * @return
+     */
+//    @PostMapping("/status/0")
+//
+//    public R<String>updateStatus( Long ids){
+//        log.info("前后联通");
+//        if (ids==null){
+//            throw new CustomException("传入的数据有误");
+//        }
+//        LambdaQueryWrapper<Dish> wrapper = new LambdaQueryWrapper<>();
+//        wrapper.eq(Dish::getId,ids);
+//        List<Dish> list = dishService.list(wrapper);
+//        for (Dish dishlist : list) {
+//            dishlist.setStatus(0);
+//        }
+//        dishService.updateBatchById(list);
+//        return R.success(AntPathmathcherSS.FINISH);
+//    }
+//
+
+    /**
+     * 批量起售
+     * @return
+     */
+    @PostMapping("status/{statusValue}")
+    @ApiOperation(value = "停售启售/批量启售/停售")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "ids", value = "菜品id集合", required = true),
+            @ApiImplicitParam(name = "statusValue", value = "状态", required = true)}
+    )
+    public R<String>bulkStartingDish(@RequestParam List<Long>ids,@PathVariable Integer statusValue){
+        log.info("前后联通");
+        if (CollectionUtils.isEmpty(ids)) {
+            throw new CustomException(AntPathmathcherSS.ERROR);
+        }
+        LambdaQueryWrapper<Dish> wrapper = new LambdaQueryWrapper<>();
+        wrapper.in(Dish::getId,ids);
+        List<Dish> list = dishService.list(wrapper);
+        for (Dish dishlist : list) {
+            dishlist.setStatus(statusValue);
+        }
+        dishService.updateBatchById(list);
+        return R.success(AntPathmathcherSS.FINISH);
+    }
+
+    /**
+     * 批量停售
+     * @param ids
+     * @return
+     */
+   /* @PostMapping("/status/{statusValue}")
+    public R<String>stopBatchesDish(@RequestParam List<Long>ids,@PathVariable Integer statusValue){
+        log.info("前后联通");
+        if (CollectionUtils.isEmpty(ids)) {
+            throw new CustomException(AntPathmathcherSS.ERROR);
+        }
+        LambdaQueryWrapper<Dish> wrapper = new LambdaQueryWrapper<>();
+        wrapper.in(Dish::getId,ids);
+        List<Dish> list = dishService.list(wrapper);
+        for (Dish dishlist : list) {
+            dishlist.setStatus(statusValue);
+        }
+        dishService.updateBatchById(list);
+        return R.success(AntPathmathcherSS.FINISH);
+    }*/
 }
