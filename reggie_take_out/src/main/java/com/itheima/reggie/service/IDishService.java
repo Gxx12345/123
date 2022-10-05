@@ -4,6 +4,8 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.itheima.reggie.dto.DishDto;
 import com.itheima.reggie.entity.Dish;
 
+import java.util.List;
+
 /**
  * 菜品
  *
@@ -29,4 +31,10 @@ public interface IDishService extends IService<Dish> {
      * @param dishDto
      */
     void updateWithFlavor(DishDto dishDto);
+
+    /**
+     * 删除菜品
+     * @param ids
+     */
+    void deleteWithFlavor(List<Long> ids);
 }

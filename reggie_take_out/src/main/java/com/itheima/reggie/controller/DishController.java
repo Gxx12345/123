@@ -1,9 +1,13 @@
 package com.itheima.reggie.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.fasterxml.jackson.databind.util.BeanUtil;
+import com.itheima.reggie.common.CustomException;
+import com.itheima.reggie.common.GlobalConstant;
 import com.itheima.reggie.common.R;
 import com.itheima.reggie.dto.DishDto;
 import com.itheima.reggie.entity.Category;
@@ -41,7 +45,7 @@ public class DishController {
     private IDishFlavorService dishFlavorService;
 
     @PostMapping
-    public R<String> save(@RequestBody DishDto dishDto){
+    public R<String> save(@RequestBody DishDto dishDto) {
         this.iDishService.saveWithFlavor(dishDto);
         return R.success("添加成功");
     }
@@ -50,27 +54,27 @@ public class DishController {
      * 菜品信息分页查询
      */
     @GetMapping("/page")
-    public R<Page<DishDto>> page(Integer page,Integer pageSize,String name){
+    public R<Page<DishDto>> page(Integer page, Integer pageSize, String name) {
         //构建分页查询对象
         Page<Dish> queryPage = new Page<>();
         queryPage.setCurrent(page);
         queryPage.setSize(pageSize);
         LambdaQueryWrapper<Dish> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.like(StringUtils.isNotBlank(name),Dish::getName,name);
+        queryWrapper.like(StringUtils.isNotBlank(name), Dish::getName, name);
         queryWrapper.orderByDesc(Dish::getUpdateTime);
         Page<Dish> dishPage = this.iDishService.page(queryPage, queryWrapper);
         //构建返回返回结果对象，并cope查询结果到对象中
         Page<DishDto> result = new Page<>();
-        BeanUtils.copyProperties(dishPage,result,"records");
+        BeanUtils.copyProperties(dishPage, result, "records");
         //遍历分页查询列表数据
         List<DishDto> dishDtoList = new ArrayList<>();
         for (Dish item : dishPage.getRecords()) {
             DishDto dishDto = new DishDto();
             //dish -> dishDto
-            BeanUtils.copyProperties(item,dishDto);
+            BeanUtils.copyProperties(item, dishDto);
             //分类名称
             Category category = this.categoryService.getById(item.getCategoryId());
-            if(category != null){
+            if (category != null) {
                 //分类名称赋值
                 dishDto.setCategoryName(category.getName());
             }
@@ -88,7 +92,7 @@ public class DishController {
      * 根据ID查询菜品信息
      */
     @GetMapping("/{id}")
-    public R<DishDto> getById(@PathVariable Long id){
+    public R<DishDto> getById(@PathVariable Long id) {
         DishDto dishDto = this.iDishService.getByIdWithFlavor(id);
         return R.success(dishDto);
     }
@@ -97,8 +101,8 @@ public class DishController {
      * 修改菜品数据
      */
     @PutMapping
-    public R<String> update(@RequestBody DishDto dishDto){
-        log.info("dishDto ==> {}",dishDto.toString());
+    public R<String> update(@RequestBody DishDto dishDto) {
+        log.info("dishDto ==> {}", dishDto.toString());
         this.iDishService.updateWithFlavor(dishDto);
         return R.success("修改菜品成功");
     }
@@ -173,5 +177,28 @@ public class DishController {
 //        }).collect(Collectors.toList());
         //endregion
         return R.success(dishDtoList);
+    }
+
+    /**
+     * 删除菜品
+     */
+    @DeleteMapping
+    public R<String> delete(@RequestParam List<Long> ids) {
+        log.info("ids => {}", ids);
+        this.iDishService.deleteWithFlavor(ids);
+        return R.success(GlobalConstant.FINISH);
+    }
+
+    /**
+     * 起售/停售
+     */
+    @PostMapping("/status/{status}")
+    public R<String> status(@PathVariable Integer status,@RequestParam List<Long> ids ) {
+        log.info("ids => {} , status => {}", ids, status);
+        LambdaUpdateWrapper<Dish> wrapper = new LambdaUpdateWrapper<>();
+        wrapper.in(CollectionUtils.isNotEmpty(ids),Dish::getId, ids)
+                .set(Dish::getStatus, status);
+        this.iDishService.update(wrapper);
+        return R.success(GlobalConstant.FINISH);
     }
 }

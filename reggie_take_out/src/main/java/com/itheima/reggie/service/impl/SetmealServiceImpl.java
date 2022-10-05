@@ -64,4 +64,37 @@ public class SetmealServiceImpl extends ServiceImpl<SetmealMapper, Setmeal> impl
         lambdaQueryWrapper.in(SetmealDish::getSetmealId,ids);
         this.setmealDishService.remove(lambdaQueryWrapper);
     }
+
+    /**
+     * 根据ID查询
+     * @param id
+     * @return
+     */
+    @Override
+    public SetmealDto getByIdWithDish(Long id) {
+        SetmealDto setmealDto = new SetmealDto();
+        Setmeal setmeal = this.getById(id);
+        BeanUtils.copyProperties(setmeal,setmealDto);
+        LambdaQueryWrapper<SetmealDish> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(SetmealDish::getSetmealId,id);
+        List<SetmealDish> setmealDishes = this.setmealDishService.list(queryWrapper);
+        setmealDto.setSetmealDishes(setmealDishes);
+        return setmealDto;
+    }
+
+    /**
+     * 修改
+     * @param setmealDto
+     */
+    @Override
+    public void updateWithDish(SetmealDto setmealDto) {
+        Setmeal setmeal = new Setmeal();
+        BeanUtils.copyProperties(setmealDto,setmeal);
+        this.updateById(setmeal);
+        LambdaQueryWrapper<SetmealDish> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(SetmealDish::getSetmealId,setmeal.getId());
+        this.setmealDishService.remove(queryWrapper);
+        setmealDto.getSetmealDishes().forEach(item->item.setSetmealId(setmeal.getId()));
+        this.setmealDishService.saveBatch(setmealDto.getSetmealDishes());
+    }
 }

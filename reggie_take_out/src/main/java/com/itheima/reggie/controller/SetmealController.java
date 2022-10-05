@@ -1,11 +1,15 @@
 package com.itheima.reggie.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.itheima.reggie.common.CustomException;
 import com.itheima.reggie.common.GlobalConstant;
 import com.itheima.reggie.common.R;
 import com.itheima.reggie.dto.SetmealDto;
 import com.itheima.reggie.entity.Category;
+import com.itheima.reggie.entity.Dish;
 import com.itheima.reggie.entity.Setmeal;
 import com.itheima.reggie.service.ICategoryService;
 import com.itheima.reggie.service.ISetmealService;
@@ -96,5 +100,38 @@ public class SetmealController {
 
         List<Setmeal> list = setmealService.list(queryWrapper);
         return R.success(list);
+    }
+
+    /**
+     * 起售/停售
+     */
+    @PostMapping("/status/{status}")
+    public R<String> delete(@PathVariable Integer status,@RequestParam List<Long> ids){
+        log.info("status => {},ids =>{}",status,ids);
+        LambdaUpdateWrapper<Setmeal> wrapper = new LambdaUpdateWrapper<>();
+        wrapper.in(CollectionUtils.isNotEmpty(ids),Setmeal::getId, ids)
+                .set(Setmeal::getStatus, status);
+        this.setmealService.update(wrapper);
+        return R.success(GlobalConstant.FINISH);
+    }
+
+    /**
+     * 根据ID查询
+     */
+    @GetMapping("/{id}")
+    public R<SetmealDto> getById(@PathVariable Long id){
+        log.info("id => {}",id);
+        SetmealDto setmealDto = this.setmealService.getByIdWithDish(id);
+        return R.success(setmealDto);
+    }
+
+    /**
+     * 修改
+     */
+    @PutMapping
+    public R<String> put(@RequestBody SetmealDto setmealDto){
+        log.info("setmealDto => {}",setmealDto.toString());
+        this.setmealService.updateWithDish(setmealDto);
+        return R.success(GlobalConstant.FINISH);
     }
 }

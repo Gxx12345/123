@@ -3,6 +3,7 @@ package com.itheima.reggie.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.itheima.reggie.common.CustomException;
 import com.itheima.reggie.dto.DishDto;
 import com.itheima.reggie.entity.Dish;
 import com.itheima.reggie.entity.DishFlavor;
@@ -84,5 +85,21 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements ID
         dishDto.getFlavors().forEach(item -> item.setDishId(dish.getId()));
         // 4.新增口味
         this.dishFlavorService.saveBatch(dishDto.getFlavors());
+    }
+
+    /**
+     * 删除菜品及其口味
+     * @param ids
+     */
+    @Override
+    public void deleteWithFlavor(List<Long> ids) {
+        LambdaQueryWrapper<Dish> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.in(Dish::getId, ids);
+        int count = this.count(queryWrapper);
+        if (count == 0) {
+            throw new CustomException("无效参数");
+        }
+        this.removeByIds(ids);
+        this.dishFlavorService.removeByIds(ids);
     }
 }
