@@ -6,7 +6,7 @@ import com.itheima.reggie.common.CustomException;
 import com.itheima.reggie.entity.Category;
 import com.itheima.reggie.entity.Dish;
 import com.itheima.reggie.entity.Setmeal;
-import com.itheima.reggie.mapper.ICategoryMapper;
+import com.itheima.reggie.mapper.CategoryMapper;
 import com.itheima.reggie.service.ICategoryService;
 import com.itheima.reggie.service.IDishService;
 import com.itheima.reggie.service.ISetmealService;
@@ -20,7 +20,7 @@ import org.springframework.stereotype.Service;
  * @since 2022/9/26 12:07
  */
 @Service
-public class CategoryServiceImpl extends ServiceImpl<ICategoryMapper, Category> implements ICategoryService {
+public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> implements ICategoryService {
 
     @Autowired
     private IDishService iDishService;

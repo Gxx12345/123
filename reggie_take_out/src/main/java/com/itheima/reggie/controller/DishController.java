@@ -2,12 +2,15 @@ package com.itheima.reggie.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.itheima.reggie.common.CustomException;
 import com.itheima.reggie.common.GlobalConstant;
 import com.itheima.reggie.common.R;
 import com.itheima.reggie.dto.DishDto;
 import com.itheima.reggie.entity.Category;
 import com.itheima.reggie.entity.Dish;
+import com.itheima.reggie.entity.DishFlavor;
 import com.itheima.reggie.service.ICategoryService;
+import com.itheima.reggie.service.IDishFlavorService;
 import com.itheima.reggie.service.IDishService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
@@ -33,6 +36,9 @@ public class DishController {
     private IDishService iDishService;
     @Autowired
     private ICategoryService iCategoryService;
+
+    @Autowired
+    private IDishFlavorService iDishFlavorService;
 
     /**
      * 新增菜品
@@ -160,20 +166,139 @@ public class DishController {
 
     /**
      * 根据条件查询对应的菜品数据
+     *
+     * @param dish
+     * @return
+     */
+    //@GetMapping("/list")
+    //public R<List<Dish>> getList(Dish dish) {
+    //    Long categoryId = dish.getCategoryId();
+    //
+    //    //构造查询条件
+    //    LambdaQueryWrapper<Dish> queryWrapper = new LambdaQueryWrapper<>();
+    //    queryWrapper.eq(categoryId != null, Dish::getCategoryId, categoryId);
+    //    //添加条件，查询状态为1（起售状态）的菜品
+    //    queryWrapper.eq(Dish::getStatus, 1);
+    //    List<Dish> dishList = iDishService.list(queryWrapper);
+    //
+    //    return R.success(dishList);
+    //}
+
+    /**
+     * 根据条件查询对应的菜品数据
+     *
      * @param dish
      * @return
      */
     @GetMapping("/list")
-    public R<List<Dish>> list(Dish dish) {
-        Long categoryId = dish.getCategoryId();
-
+    public R<List<DishDto>> list(Dish dish) {
         //构造查询条件
         LambdaQueryWrapper<Dish> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(categoryId != null , Dish::getCategoryId, categoryId);
+        queryWrapper.eq(dish.getCategoryId() != null, Dish::getCategoryId, dish.getCategoryId());
         //添加条件，查询状态为1（起售状态）的菜品
-        queryWrapper.eq(Dish::getStatus,1);
-        List<Dish> dishList = iDishService.list(queryWrapper);
+        queryWrapper.eq(Dish::getStatus, 1);
+        //添加排序条件
+        queryWrapper.orderByAsc(Dish::getSort).orderByDesc(Dish::getUpdateTime);
 
-        return R.success(dishList);
+        List<Dish> list = iDishService.list(queryWrapper);
+
+        //region for循环写法
+        List<DishDto> dishDtoList = new ArrayList<>();
+        for (Dish item : list) {
+            DishDto dishDto = new DishDto();
+            BeanUtils.copyProperties(item, dishDto);
+            Long categoryId = item.getCategoryId();//分类id
+            //根据id查询分类对象
+            Category category = iCategoryService.getById(categoryId);
+            if (category != null) {
+                String categoryName = category.getName();
+                dishDto.setCategoryName(categoryName);
+            }
+            //当前菜品的id
+            Long dishId = item.getId();
+            LambdaQueryWrapper<DishFlavor> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+            lambdaQueryWrapper.eq(DishFlavor::getDishId, dishId);
+            //SQL:select * from dish_flavor where dish_id = ?
+            List<DishFlavor> dishFlavorList = iDishFlavorService.list(lambdaQueryWrapper);
+            dishDto.setFlavors(dishFlavorList);
+            dishDtoList.add(dishDto);
+        }
+        //endregion
+        //region Lambda使用Map方法的写法
+        //        List<DishDto> dishDtoList = list.stream().map((item) -> {
+//            DishDto dishDto = new DishDto();
+//            BeanUtils.copyProperties(item,dishDto);
+//            Long categoryId = item.getCategoryId();//分类id
+//            //根据id查询分类对象
+//            Category category = categoryService.getById(categoryId);
+//            if(category != null){
+//                String categoryName = category.getName();
+//                dishDto.setCategoryName(categoryName);
+//            }
+//            //当前菜品的id
+//            Long dishId = item.getId();
+//            LambdaQueryWrapper<DishFlavor> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+//            lambdaQueryWrapper.eq(DishFlavor::getDishId,dishId);
+//            //SQL:select * from dish_flavor where dish_id = ?
+//            List<DishFlavor> dishFlavorList = dishFlavorService.list(lambdaQueryWrapper);
+//            dishDto.setFlavors(dishFlavorList);
+//            return dishDto;
+//        }).collect(Collectors.toList());
+        //endregion
+        return R.success(dishDtoList);
     }
+
+
+    /**
+     * 批量删除菜品
+     *
+     * @param ids
+     * @return
+     */
+    @DeleteMapping
+    public R<String> deleteByIds(@RequestParam List<Long> ids) {
+        if (ids == null) {
+            return R.error("传入的参数有误");
+        }
+
+        ids.forEach(id -> {
+            Dish dish = iDishService.getById(id);
+            if (dish.getStatus() == 1) {
+                throw new CustomException("该菜品正在出售，无法删除");
+            }
+            iDishService.removeByIds(ids);
+        });
+
+        return R.success(GlobalConstant.FINISH);
+    }
+
+
+    /**
+     * 批量停售起售
+     *
+     * @param status 路径参数 0 停售 1 起售
+     * @param ids id集合
+     * @return
+     */
+    @PostMapping("/status/{status}")
+    public R<String> status(@PathVariable Integer status, @RequestParam List<Long> ids) {
+        log.info("前后端联通");
+
+        // 参数校验
+        if (ids == null) {
+            throw new CustomException("传入的参数有误");
+        }
+        // 遍历id集合获取到每一个id
+        for (Long id : ids) {
+            // 根据id获取到相应的菜品对象
+            Dish dish = iDishService.getById(id);
+            // 修改状态
+            dish.setStatus(status);
+            // 调用mp方法修改对象
+            iDishService.updateById(dish);
+        }
+
+        return R.success(GlobalConstant.FINISH);
+    }
+
 }

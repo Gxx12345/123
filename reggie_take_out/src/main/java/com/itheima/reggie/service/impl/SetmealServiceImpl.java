@@ -1,9 +1,11 @@
 package com.itheima.reggie.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.itheima.reggie.common.CustomException;
 import com.itheima.reggie.dto.SetmealDto;
+import com.itheima.reggie.entity.Dish;
 import com.itheima.reggie.entity.Setmeal;
 import com.itheima.reggie.entity.SetmealDish;
 import com.itheima.reggie.mapper.SetmealMapper;
@@ -85,5 +87,66 @@ public class SetmealServiceImpl extends ServiceImpl<SetmealMapper, Setmeal> impl
         LambdaQueryWrapper<SetmealDish> setmealDishLambdaQueryWrapper = new LambdaQueryWrapper<>();
         setmealDishLambdaQueryWrapper.in(SetmealDish::getSetmealId, ids);
         iSetmealDishService.remove(setmealDishLambdaQueryWrapper);
+    }
+
+    /**
+     * 根据id查询套餐及对应的菜品
+     *
+     * @param id
+     */
+    @Override
+    public SetmealDto getByIdWithFlavor(Long id) {
+        // 1 查询套餐
+        Setmeal setmeal = getById(id);
+        if (setmeal == null) {
+            throw new CustomException("传入的参数有误");
+        }
+        // 2 构建setmealDto,赋值
+        SetmealDto setmealDto = new SetmealDto();
+        // 第一个参数,是有值的
+        // 第二个参数,是要赋值给其的目标 target
+        BeanUtils.copyProperties(setmeal, setmealDto);
+
+        // 3 根据这个套餐查询其菜品
+        LambdaQueryWrapper<SetmealDish> queryWrapper = new LambdaQueryWrapper<>();
+        // 根据菜品ID(setmealId)查询这个套餐的菜品
+        queryWrapper.eq(SetmealDish::getSetmealId, setmeal.getId());
+        // 菜品信息
+        List<SetmealDish> setmealDishList = iSetmealDishService.list(queryWrapper);
+        setmealDto.setSetmealDishes(setmealDishList);
+
+        return setmealDto;
+    }
+
+    /**
+     * 更新套餐信息，同时更新对应的菜品信息
+     *
+     * @param setmealDto
+     */
+    @Override
+    public void updateWithDish(SetmealDto setmealDto) {
+        if (setmealDto == null) {
+            throw new CustomException("传入的参数有误");
+        }
+        // 1.先更新Setmeal表
+        Setmeal setmeal = new Setmeal();
+        BeanUtils.copyProperties(setmealDto, setmeal);
+        updateById(setmeal);
+
+        // 2.删除原来的菜品
+        LambdaQueryWrapper<SetmealDish> queryWrapper = new LambdaQueryWrapper<>();
+        // 根据菜品id删除其菜品信息
+        queryWrapper.eq(SetmealDish::getSetmealId, setmeal.getId());
+        iSetmealDishService.remove(queryWrapper);
+
+        // 3.把setmealId重新赋值
+        if (CollectionUtils.isNotEmpty(setmealDto.getSetmealDishes())) {
+            for (SetmealDish setmealDish : setmealDto.getSetmealDishes()) {
+                // 重新给套餐菜品关系信息赋值
+                setmealDish.setSetmealId(setmeal.getId());
+            }
+        }
+        // 4.添加新的套餐菜品
+        iSetmealDishService.saveBatch(setmealDto.getSetmealDishes());
     }
 }

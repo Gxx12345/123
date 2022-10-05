@@ -85,9 +85,6 @@ public class DishServiceImpl extends ServiceImpl<DishMapper, Dish> implements ID
         // 第二个参数,是要赋值给其的目标 target
         BeanUtils.copyProperties(dish,dishDto);
 
-       /* for (DishFlavor flavor : dishDto.getFlavors()) {
-            flavor.setDishId(dish.getId());
-        }*/
 
         // 3 根据这个菜品查询其口味
         // 需要口味service

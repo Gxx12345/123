@@ -39,6 +39,8 @@ public class SetmealController {
     private ISetmealService iSetmealService;
     @Autowired
     private ICategoryService iCategoryService;
+    @Autowired
+    private ISetmealDishService iSetmealDishService;
 
     /**
      * 新增套餐，同时需要保存套餐和菜品的关联关系
@@ -74,6 +76,7 @@ public class SetmealController {
         iSetmealService.page(setmealPage, queryWrapper);
 
         // 定义返回结果
+
         Page<SetmealDto> result = new Page<>();
         // 转化结果为dto
         BeanUtils.copyProperties(setmealPage, result, "records");
@@ -100,6 +103,7 @@ public class SetmealController {
 
     /**
      * 删除套餐
+     *
      * @param ids
      * @return
      */
@@ -109,4 +113,73 @@ public class SetmealController {
 
         return R.success(GlobalConstant.FINISH);
     }
+
+    /**
+     * 根据条件查询套餐数据
+     *
+     * @param setmeal
+     * @return
+     */
+    @GetMapping("/list")
+    public R<List<Setmeal>> list(Setmeal setmeal) {
+        LambdaQueryWrapper<Setmeal> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(setmeal.getCategoryId() != null, Setmeal::getCategoryId, setmeal.getCategoryId());
+        queryWrapper.eq(setmeal.getStatus() != null, Setmeal::getStatus, setmeal.getStatus());
+        queryWrapper.orderByDesc(Setmeal::getUpdateTime);
+
+        List<Setmeal> list = iSetmealService.list(queryWrapper);
+        return R.success(list);
+    }
+
+    /**
+     * 批量停售起售 0 停售 1 起售
+     *
+     * @param status 路径参数
+     * @param ids    id集合
+     * @return
+     */
+    @PostMapping("/status/{status}")
+    public R<String> status(@PathVariable Integer status, @RequestParam List<Long> ids) {
+        log.info("前后端联通");
+        // 参数校验
+        if (ids == null) {
+            throw new CustomException("传入的参数有误");
+        }
+        // 遍历id集合
+        for (Long id : ids) {
+            // 根据id获取到相应的套餐对象
+            Setmeal setmeal = iSetmealService.getById(id);
+            // 修改状态
+            setmeal.setStatus(status);
+            // 修改套餐对象
+            iSetmealService.updateById(setmeal);
+        }
+        return R.success(GlobalConstant.FINISH);
+    }
+
+
+    /**
+     * 根据id查询套餐
+     *
+     * @param id
+     * @return
+     */
+    @GetMapping("/{id}")
+    public R<SetmealDto> getById(@PathVariable Long id) {
+        SetmealDto setmealDto =  iSetmealService.getByIdWithFlavor(id);
+        return R.success(setmealDto);
+    }
+
+
+    /**
+     * 修改套餐
+     * @param setmealDto
+     * @return
+     */
+    @PutMapping
+    public R<String> update(@RequestBody SetmealDto setmealDto) {
+        iSetmealService.updateWithDish(setmealDto);
+        return R.success(GlobalConstant.FINISH);
+    }
+
 }

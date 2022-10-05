@@ -43,11 +43,11 @@ public class LoginFilter implements Filter {
 
         //对比传进来的路径和需要过滤的路径是否匹配
         for (String uri : uris) {
-            boolean match = ANT_PATH_MATCHER.match(uri,requestURI);
+            boolean match = ANT_PATH_MATCHER.match(uri, requestURI);
 
             if (match) {
                 //匹配 ， 直接放行
-                filterChain.doFilter(servletRequest, servletResponse);
+                filterChain.doFilter(request, response);
                 return;
             }
         }
@@ -59,7 +59,7 @@ public class LoginFilter implements Filter {
             // 获取到当前登陆对象ID并传入ThreadLocal包装类中以便使用
             BaseContext.setCurrentUserId(ID);
             //不为null直接放行
-            filterChain.doFilter(servletRequest, servletResponse);
+            filterChain.doFilter(request, response);
             return;
         }
 
@@ -73,19 +73,17 @@ public class LoginFilter implements Filter {
             // 当前线程ID
             // 如果当前用户已登录,那么需要把当前用户登录的ID,放入到Threadlocal中,以便在后续的线程调用中使用相关的值
             BaseContext.setCurrentUserId(userId);
-            filterChain.doFilter(servletRequest, servletResponse);
+            filterChain.doFilter(request, response);
             return;
         }
+
+
+
         // 如果没取到,代表未登录
         // 5、如果未登录则返回未登录结果
-        String notlogin = JSON.toJSONString(R.error("NOTLOGIN"));
-        response.getWriter().write(notlogin);
-
         //Session为null，返回前端数据，该用户未登录
         String notLogin = JSON.toJSONString(R.error("NOTLOGIN"));
         response.getWriter().write(notLogin);
-
-
 
     }
 
