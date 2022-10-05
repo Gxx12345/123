@@ -7,6 +7,9 @@ import com.itheima.reggie.common.GlobalConstant;
 import com.itheima.reggie.common.R;
 import com.itheima.reggie.entity.ShoppingCart;
 import com.itheima.reggie.service.ShoppingCartService;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -93,7 +96,7 @@ public class ShoppingCartController {
     }
 
     /**
-     * 删除购物车
+     * 清空购物车
      */
     @DeleteMapping("/clean")
     public R<String> clean() {
@@ -104,5 +107,20 @@ public class ShoppingCartController {
         //  当前登录用户的购物车数据
         this.shoppingCartService.remove(queryWrapper);
         return R.success(GlobalConstant.FINISH);
+    }
+
+    /**
+     * 购物车减号
+     */
+    @PostMapping("/sub")
+    @ApiOperation(value = "购物车减号")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "shoppingCartParam", value = "购物车信息", required = true)
+    })
+    public R<ShoppingCart> sub(@RequestBody ShoppingCart shoppingCartParam) {
+        if (shoppingCartParam.getSetmealId() == null && shoppingCartParam.getDishId() == null){
+            throw new CustomException(GlobalConstant.ERROR_PARAM);
+        }
+        return R.success(this.shoppingCartService.subShoppingCart(shoppingCartParam));
     }
 }

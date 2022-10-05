@@ -1,12 +1,17 @@
 package com.itheima.reggie.service.impl;
+
 import java.time.LocalDateTime;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.core.toolkit.IdWorker;
+import com.baomidou.mybatisplus.core.toolkit.StringUtils;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.itheima.reggie.common.BaseContext;
 import com.itheima.reggie.common.CustomException;
+import com.itheima.reggie.common.GlobalConstant;
+import com.itheima.reggie.dto.OrderDto;
 import com.itheima.reggie.entity.*;
 import com.itheima.reggie.mapper.OrderMapper;
 import com.itheima.reggie.service.*;
@@ -14,10 +19,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * 订单业务层实现类
@@ -30,7 +38,7 @@ import java.util.List;
 public class OrderServiceImpl extends ServiceImpl<OrderMapper, Orders> implements OrderService {
 
     /**
-     *地址薄
+     * 地址薄
      */
     @Autowired
     private IAddressBookService addressBookService;
@@ -43,6 +51,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Orders> implement
     private UserService userService;
     @Autowired
     private OrderDetailService orderDetailService;
+
     /**
      * 用户下单
      *
@@ -134,5 +143,104 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Orders> implement
         // 当前登录用户删除当前登录用户的购物车
         shoppingCartQueryWrapper.eq(ShoppingCart::getUserId, BaseContext.getCurrentUserId());
         this.shoppingCartService.remove(removeQueryWrapper);
+    }
+
+    /**
+     * 分页方法
+     *
+     * @param page      页码
+     * @param pageSize  每页记录数
+     * @param number    订单号
+     * @param beginTime 开始时间
+     * @param endTime   结束时间
+     * @return
+     */
+    @Override
+    public Page<Orders> getPage(Integer page, Integer pageSize, String number, String beginTime, String endTime) {
+        // 创建一个page对象
+        // 通过page对象修改值
+        Page<Orders> queryPage = new Page<>();
+        queryPage.setCurrent(page);
+        queryPage.setSize(pageSize);
+        //  拼接
+        LambdaQueryWrapper<Orders> queryWrapper = new LambdaQueryWrapper<>();
+        //  通过eq进行比较，首先判断number的值是否是空的，如果是空的后面就不会拼接，不为空再拼接
+        queryWrapper.eq(StringUtils.isNotBlank(number), Orders::getNumber, number);
+        //  判断beginTime和endTime是否是空，不为空在拼接
+        if (StringUtils.isNotBlank(beginTime) && StringUtils.isNotBlank(endTime)) {
+            queryWrapper.between(Orders::getOrderTime, beginTime, endTime);
+        }
+        //  返回最终结果
+        return this.page(queryPage, queryWrapper);
+    }
+
+    /**
+     * 获取用户历史订单
+     *
+     * @param page
+     * @param pageSize
+     * @return
+     */
+    @Override
+    public Page<OrderDto> getUserPage(Integer page, Integer pageSize) {
+        //  创建page对象把参数传进去
+        Page<Orders> queryPage = new Page<>(page, pageSize);
+        //  创建构造器
+        LambdaQueryWrapper<Orders> queryWrapper = new LambdaQueryWrapper<>();
+        //  获取当前登录的用户ID
+        queryWrapper.eq(Orders::getUserId, BaseContext.getCurrentUserId());
+        //  根据时间进行降序
+        queryWrapper.orderByDesc(Orders::getOrderTime);
+        //  把获取的参数传递给新的page对象
+        Page<Orders> ordersPage = this.page(queryPage, queryWrapper);
+        Page<OrderDto> result = new Page<>(page, pageSize);
+        //  没有查到记录的话，直接返回
+        if (CollectionUtils.isEmpty(ordersPage.getRecords())) {
+            return result;
+        }
+        //  把数据拷贝到result当中，不考虑records
+        BeanUtils.copyProperties(ordersPage, result, "records");
+        List<OrderDto> orderDtoList = ordersPage.getRecords().stream().map(item -> {
+            OrderDto dto = new OrderDto();
+            BeanUtils.copyProperties(item,dto);
+            //  查询子订单
+            LambdaQueryWrapper<OrderDetail> orderDetailWrapper = new LambdaQueryWrapper<>();
+            orderDetailWrapper.eq(OrderDetail::getOrderId, item.getId());
+            //  子订单数据
+            List<OrderDetail> orderDetails = this.orderDetailService.list(orderDetailWrapper);
+            dto.setOrderDetails(orderDetails);
+            return dto;
+        }).collect(Collectors.toList());
+        result.setRecords(orderDtoList);
+        return result;
+    }
+
+    /**
+     * 再来一单
+     *
+     * @param orders
+     * @return
+     */
+    @Override
+    @Transactional
+    public boolean againOrder(Orders orders) {
+        Optional.ofNullable(orders.getId())
+                .orElseThrow(() -> new CustomException(GlobalConstant.ERROR_PARAM));
+        Orders oldOrder = this.getById(orders.getId());
+        Optional.ofNullable(oldOrder)
+                .orElseThrow(() -> new CustomException(GlobalConstant.ERROR_PARAM));
+        LambdaQueryWrapper<OrderDetail> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(OrderDetail::getOrderId, orders.getId());
+        List<OrderDetail> orderDetailList = this.orderDetailService.list(queryWrapper);
+        if (CollectionUtils.isEmpty(orderDetailList)) {
+            throw new CustomException(GlobalConstant.ERROR_PARAM + ",请重新选择商品下单");
+        }
+        orderDetailList.forEach(orderDetail -> {
+            ShoppingCart shoppingCart = new ShoppingCart();
+            BeanUtils.copyProperties(orderDetail,shoppingCart,"id");
+            shoppingCart.setUserId(BaseContext.getCurrentUserId());
+            this.shoppingCartService.add(shoppingCart);
+        });
+        return Boolean.TRUE;
     }
 }

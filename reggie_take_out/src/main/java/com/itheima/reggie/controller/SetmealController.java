@@ -3,12 +3,17 @@ package com.itheima.reggie.controller;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.itheima.reggie.common.CustomException;
+import com.itheima.reggie.common.GlobalConstant;
 import com.itheima.reggie.common.R;
 import com.itheima.reggie.dto.SetmealDto;
 import com.itheima.reggie.entity.Category;
 import com.itheima.reggie.entity.Setmeal;
 import com.itheima.reggie.service.CategoryService;
 import com.itheima.reggie.service.SetmealService;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiOperation;
+import jdk.nashorn.internal.runtime.GlobalConstants;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,9 +21,11 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * 套餐控制器
+ *
  * @author Gmy
  * @since 2022/9/29 11:27
  */
@@ -31,15 +38,19 @@ public class SetmealController {
     private SetmealService setmealService;
     @Autowired
     private CategoryService categoryService;
+
     @PostMapping
     public R<String> save(@RequestBody SetmealDto dto) {
         log.info("前后端联通");
         //  新增套餐
         //  在service中拓展的方法
         setmealService.saveWithDish(dto);
-        return null;
+        return R.success(GlobalConstant.FINISH);
     }
 
+    /**
+     * 套餐查询
+     */
     @GetMapping("/page")
     public R<Page<SetmealDto>> page(Integer page, Integer pageSize, String name) {
         //  1. 构建分页条件对象
@@ -57,12 +68,12 @@ public class SetmealController {
         Page<SetmealDto> result = new Page<>();
         //  setmealPage -> result
         //  并copy查询结果到该对象中
-        BeanUtils.copyProperties(setmealPage,result);
+        BeanUtils.copyProperties(setmealPage, result);
         //  5. 遍历分页查询列表数据
         List<SetmealDto> setmealDtoList = new ArrayList<>();
         for (Setmeal item : setmealPage.getRecords()) {
             SetmealDto dto = new SetmealDto();
-            BeanUtils.copyProperties(item,dto);
+            BeanUtils.copyProperties(item, dto);
             //  查询分类
             Category category = this.categoryService.getById(item.getCategoryId());
             if (category != null) {
@@ -77,10 +88,70 @@ public class SetmealController {
         return R.success(result);
     }
 
+    /**
+     * 删除套餐
+     */
     @DeleteMapping
     public R<String> delete(@RequestParam List<Long> ids) {
         log.info("前后端联通");
         setmealService.deleteByIds(ids);
-        return null;
+        return R.success(GlobalConstant.FINISH);
+    }
+
+    /**
+     * 套餐状态的修改
+     */
+    @PostMapping("/status/{status}")
+    public R<String> status(@PathVariable Integer status, @RequestParam List<Long> ids) {
+        log.info("前后端联通");
+        for (Long id : ids) {
+            Setmeal byId = setmealService.getById(id);
+            byId.setStatus(status);
+            setmealService.updateById(byId);
+        }
+        return R.success(GlobalConstant.FINISH);
+    }
+
+    /**
+     * 根据id获取套餐信息
+     * @return
+     */
+    @GetMapping("/{id}")
+    @ApiOperation(value = "根据id获取套餐接口")
+    @ApiImplicitParam(name = "id", value = "套餐id", required = true)
+    public R<SetmealDto> update(@PathVariable Long id) {
+        log.info("前后端联通");
+        Optional.ofNullable(id)
+                .orElseThrow(() -> new CustomException(GlobalConstant.ERROR_PARAM));
+        return R.success(this.setmealService.getSetmealById(id));
+    }
+
+    /**
+     * 更新套餐
+     * @param setmealDto
+     * @return
+     */
+    @PutMapping
+    @ApiOperation(value = "更新接口")
+    @ApiImplicitParam(name = "setmealDto", value = "套餐信息", required = true)
+    public R<String> update(@RequestBody SetmealDto setmealDto) {
+        Optional.ofNullable(setmealDto.getId())
+                .orElseThrow(() -> new CustomException(GlobalConstant.ERROR_PARAM));
+        Boolean finished = this.setmealService.updateWithDish(setmealDto);
+        return finished ? R.success(GlobalConstant.FINISH) : R.error(GlobalConstant.FAILED);
+    }
+
+    /**
+     * 根据条件查询套餐
+     */
+    @GetMapping("/list")
+    public R<List<Setmeal>> list(Setmeal setmeal) {
+        LambdaQueryWrapper<Setmeal> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(setmeal.getCategoryId() != null, Setmeal::getCategoryId, setmeal.getCategoryId());
+        queryWrapper.eq(setmeal.getStatus() != null, Setmeal::getStatus, setmeal.getStatus());
+        queryWrapper.orderByDesc(Setmeal::getUpdateTime);
+
+        List<Setmeal> list = this.setmealService.list(queryWrapper);
+        return R.success(list);
     }
 }

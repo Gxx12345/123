@@ -27,4 +27,10 @@ public class GlobalConstant {
      * 操作失败
      */
     public static final String FAILED = "操作失败";
+
+    /**
+     * 传入的参数有误
+     */
+    public static final String ERROR_PARAM = "传入的参数有误";
+
 }

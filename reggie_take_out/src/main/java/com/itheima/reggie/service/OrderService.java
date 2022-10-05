@@ -1,6 +1,8 @@
 package com.itheima.reggie.service;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.itheima.reggie.dto.OrderDto;
 import com.itheima.reggie.entity.Orders;
 
 /**
@@ -15,4 +17,21 @@ public interface OrderService extends IService<Orders> {
      * @param orders
      */
     void submit(Orders orders);
+
+    Page<Orders> getPage(Integer page, Integer pageSize, String number, String beginTime, String endTime);
+
+    /**
+     * 获取用户历史订单
+     * @param page
+     * @param pageSize
+     * @return
+     */
+    Page<OrderDto> getUserPage(Integer page, Integer pageSize);
+
+    /**
+     * 再来一单
+     * @param orders
+     * @return
+     */
+    boolean againOrder(Orders orders);
 }

@@ -4,18 +4,21 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.itheima.reggie.common.CustomException;
+import com.itheima.reggie.common.GlobalConstant;
 import com.itheima.reggie.dto.SetmealDto;
 import com.itheima.reggie.entity.Setmeal;
 import com.itheima.reggie.entity.SetmealDish;
 import com.itheima.reggie.mapper.SetmealMapper;
 import com.itheima.reggie.service.SetmealDishService;
 import com.itheima.reggie.service.SetmealService;
+import jdk.nashorn.internal.runtime.GlobalConstants;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * 套餐业务层
@@ -97,5 +100,53 @@ public class SetmealServiceImpl extends ServiceImpl<SetmealMapper,Setmeal> imple
         LambdaQueryWrapper<SetmealDish> lambdaQueryWrapper = new LambdaQueryWrapper<>();
         lambdaQueryWrapper.in(SetmealDish::getSetmealId, ids);
         this.setmealDishService.remove(lambdaQueryWrapper);
+    }
+
+    /**
+     * 根据id获取套餐信息
+     */
+    @Override
+    public SetmealDto getSetmealById(Long id) {
+        Optional.ofNullable(id).orElseThrow(() -> new CustomException(GlobalConstant.ERROR_PARAM));
+        // 查询套餐
+        Setmeal setmeal = this.getById(id);
+        Optional.ofNullable(setmeal).orElseThrow(() -> new CustomException(GlobalConstant.ERROR_PARAM));
+        SetmealDto setmealDto = new SetmealDto();
+        BeanUtils.copyProperties(setmeal, setmealDto);
+        LambdaQueryWrapper<SetmealDish> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(SetmealDish::getSetmealId, id);
+        List<SetmealDish> setmealDishList = this.setmealDishService.list(queryWrapper);
+        setmealDto.setSetmealDishes(setmealDishList);
+        return setmealDto;
+    }
+
+    /**
+     * 更新套餐
+     *
+     * @param setmealDto
+     */
+    @Override
+    @Transactional
+    public Boolean updateWithDish(SetmealDto setmealDto) {
+        // 校验
+        Optional.ofNullable(setmealDto.getId())
+                .orElseThrow(() -> new CustomException(GlobalConstant.ERROR_PARAM));
+        Setmeal setmeal = this.getById(setmealDto.getId());
+        Optional.ofNullable(setmeal)
+                .orElseThrow(() -> new CustomException(GlobalConstant.ERROR_PARAM));
+        // 更新
+        Setmeal update = new Setmeal();
+        BeanUtils.copyProperties(setmealDto, update);
+        boolean finished = this.updateById(update);
+        if (CollectionUtils.isNotEmpty(setmealDto.getSetmealDishes())) {
+            // 先删除
+            LambdaQueryWrapper<SetmealDish> queryWrapper = new LambdaQueryWrapper<>();
+            queryWrapper.eq(SetmealDish::getSetmealId, setmeal.getId());
+            this.setmealDishService.remove(queryWrapper);
+            // 后添加
+            setmealDto.getSetmealDishes().forEach(item -> item.setSetmealId(setmeal.getId()));
+            this.setmealDishService.saveBatch(setmealDto.getSetmealDishes());
+        }
+        return finished;
     }
 }

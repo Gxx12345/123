@@ -10,4 +10,15 @@ import com.itheima.reggie.entity.ShoppingCart;
  * @since 2022/9/30 12:21
  */
 public interface ShoppingCartService extends IService<ShoppingCart> {
+    /**
+     * 添加购物车
+     */
+    ShoppingCart add(ShoppingCart shoppingCartParam);
+
+    /**
+     * 购物车减号
+     * @param shoppingCartParam
+     * @return
+     */
+    ShoppingCart  subShoppingCart(ShoppingCart shoppingCartParam);
 }

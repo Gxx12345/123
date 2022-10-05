@@ -1,5 +1,7 @@
 package com.itheima.reggie.common;
 
+import com.itheima.reggie.common.pojo.UserInfo;
+
 /**
  * 基于ThreadLocal封装工具类，用户保存和获取当前登录用户id
  *
@@ -15,6 +17,7 @@ public class BaseContext {
     public static void setCurrentUserId(Long currentUserId) {
         THREAD_LOCAL_CURRENT_USER.set(currentUserId);
     }
+
     /**
      * 获取当前登录用户ID
      * @return
@@ -22,5 +25,4 @@ public class BaseContext {
     public static Long getCurrentUserId() {
         return THREAD_LOCAL_CURRENT_USER.get();
     }
-
 }
