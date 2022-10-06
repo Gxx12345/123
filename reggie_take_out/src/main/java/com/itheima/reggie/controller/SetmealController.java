@@ -18,6 +18,8 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.reflect.ConstructorUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -47,6 +49,7 @@ public class SetmealController {
      *
      * @param setmealDto
      */
+    @CacheEvict(value = "setmealCache",allEntries = true) //清除setmealCache名称下,所有的缓存数据
     @PostMapping
     public R<String> save(@RequestBody SetmealDto setmealDto) {
         iSetmealService.saveWithDish(setmealDto);
@@ -107,6 +110,7 @@ public class SetmealController {
      * @param ids
      * @return
      */
+    @CacheEvict(value = "setmealCache",allEntries = true) //清除setmealCache名称下,所有的缓存数据
     @DeleteMapping
     public R<String> deleteByIds(@RequestParam List<Long> ids) {
         iSetmealService.deleteByIds(ids);
@@ -120,6 +124,8 @@ public class SetmealController {
      * @param setmeal
      * @return
      */
+    // setmealCache : categoryId_status ---  key : values
+    @Cacheable(value = "setmealCache",key = "#setmeal.categoryId + '_' + #setmeal.status")
     @GetMapping("/list")
     public R<List<Setmeal>> list(Setmeal setmeal) {
         LambdaQueryWrapper<Setmeal> queryWrapper = new LambdaQueryWrapper<>();
@@ -176,6 +182,7 @@ public class SetmealController {
      * @param setmealDto
      * @return
      */
+    @CacheEvict(value = "setmealCache",allEntries = true) //清除setmealCache名称下,所有的缓存数据
     @PutMapping
     public R<String> update(@RequestBody SetmealDto setmealDto) {
         iSetmealService.updateWithDish(setmealDto);
