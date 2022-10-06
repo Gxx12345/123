@@ -22,10 +22,13 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.ibatis.annotations.Delete;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 菜品表控制层
@@ -50,10 +53,20 @@ public class DishColltroller {
     private ICategoryService iCategoryService;
     @Autowired
     private IDishFlavorService iDishFlavorService;
+    @Autowired
+    private RedisTemplate<Object,Object> redisTemplate;
     @PostMapping
     public R<String> save(@RequestBody DishDto dishDto){
         log.info("前后端联通");
         // 调用dishService的业务方法，完成保存菜品
+
+
+        //如果引入缓存
+        //那么在对数据库的数据进行修改或者添加,删除的时候,都需要清理缓存
+        //清理的话,需要key
+        //现在是以分类作为key保存数据的,那么这里就要拿到这个key
+        String key = "dish_" + dishDto.getCategoryId() + "_1";
+        redisTemplate.delete(key);
         dishService.saveWithFlavor(dishDto);
         return R.success(AntPathmathcherSS.FINISH);
     }
@@ -170,6 +183,12 @@ public class DishColltroller {
     @PutMapping
     public R<String> update(@RequestBody DishDto dishDto) {
         log.info("前后端联通");// controller -> service -> mapper
+        //更新这里,需要删除掉菜品相关的所以缓冲
+        //是应为在更新新菜品时,可以修改这个菜品的分类
+        //假设数据在更新之前,dishDto.getCategoryId()="123"
+        //数据在更新之后,选择一个其他的分类 dishDto.getCategoryId()="321"
+        Set<Object> keys = redisTemplate.keys("dish_*");
+        redisTemplate.delete(keys);
         this.dishService.updateWithFlavor(dishDto);
         return R.success(AntPathmathcherSS.FINISH);
     }
@@ -202,6 +221,18 @@ public class DishColltroller {
      */
     @GetMapping("/list")
     public R<List<DishDto>> list(Dish dish) {
+    //返回的结果
+        List<DishDto> dishDtoList;
+        //保存到redis中的key
+        //获取时也要用
+        String key = "dish_" + dish.getCategoryId() + "_" + dish.getStatus();//dish_1397844391040167938_1
+       //根据这个key,到redis中获取相应的数据
+        dishDtoList = (List<DishDto>)redisTemplate.opsForValue().get(key);
+        if(CollectionUtils.isNotEmpty(dishDtoList)){
+            //如果存在，直接返回，无需查询数据库
+            return R.success(dishDtoList);
+        }
+
         //构造查询条件
         LambdaQueryWrapper<Dish> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(dish.getCategoryId() != null, Dish::getCategoryId, dish.getCategoryId());
@@ -211,9 +242,9 @@ public class DishColltroller {
         queryWrapper.orderByAsc(Dish::getSort).orderByDesc(Dish::getUpdateTime);
 
         List<Dish> list = dishService.list(queryWrapper);
-
-        //region foreach写法
-        List<DishDto> dishDtoList = new ArrayList<>();
+        // 如果在redis中没有查询到,会返回一个null
+        //这样的话dishDtoList就是null,所以需要实例化  (不实例话回报空指针的 )
+        dishDtoList = new ArrayList<>();
         for (Dish item : list) {
             DishDto dishDto = new DishDto();
             BeanUtils.copyProperties(item, dishDto);
@@ -231,8 +262,10 @@ public class DishColltroller {
             //SQL:select * from dish_flavor where dish_id = ?
             List<DishFlavor> dishFlavorList = iDishFlavorService.list(lambdaQueryWrapper);
             dishDto.setFlavors(dishFlavorList);
+            //如果没有实例化,会报空指针
             dishDtoList.add(dishDto);
         }
+        redisTemplate.opsForValue().set(key,dishDtoList);
         //endregion
         //region Lambda使用Map方法的写法
         //        List<DishDto> dishDtoList = list.stream().map((item) -> {

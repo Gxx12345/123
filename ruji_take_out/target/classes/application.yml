@@ -11,6 +11,21 @@ spring:
       url: jdbc:mysql://localhost:3306/ruji?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowPublicKeyRetrieval=true
       username: root
       password: 1234
+
+  redis:
+    #连接地址
+    host: 127.0.0.1
+    #端口号
+    port: 6379
+    #密码
+    #password: 123456
+    #redis使用的是那个数据库
+    database: 4
+
+  cache:
+    redis:
+      time-to-live: 1800000 #设置缓存数据的过期时间
+
 mybatis-plus:
   configuration:
     #在映射实体或者属性时，将数据库中表名和字段名中的下划线去掉，按照驼峰命名法映射

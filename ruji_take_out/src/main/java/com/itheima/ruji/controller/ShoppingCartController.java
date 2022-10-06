@@ -116,7 +116,7 @@ public R<String>deleteShop(){
      * @return
      */
     @PostMapping("/sub")
-  public R<String>update(@RequestBody ShoppingCart shoppingCartParam){
+  public R<ShoppingCart>update(@RequestBody ShoppingCart shoppingCartParam){
     log.info("前后联通:{}",shoppingCartParam.toString());
     // 1）查询当前用户的购物车中是否有此菜品或套餐的数据
     LambdaQueryWrapper<ShoppingCart> wrapper = new LambdaQueryWrapper<>();
@@ -134,11 +134,13 @@ public R<String>deleteShop(){
         throw new CustomException("输入数据有误");
     }
     ShoppingCart one = iShoppingCartService.getOne(wrapper);
-    if (one!=null){
-        iShoppingCartService.remove(wrapper);
+    if (one.getNumber()==1){
+        iShoppingCartService.removeById(one);
+        one.setNumber(0);
     }else{
-        throw  new CustomException("购物车位空,请先添加商品");
+        one.setNumber(one.getNumber()-1);
+        iShoppingCartService.updateById(one);
     }
-    return R.success(AntPathmathcherSS.FINISH);
+    return R.success(one);
   }
 }

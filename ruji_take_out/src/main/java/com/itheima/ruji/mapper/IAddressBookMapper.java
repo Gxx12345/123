@@ -11,5 +11,5 @@ import org.apache.ibatis.annotations.Mapper;
  * @since 2022/7/29 11:22
  */
 @Mapper
-public interface AddressBookMapper extends BaseMapper<AddressBook> {
+public interface IAddressBookMapper extends BaseMapper<AddressBook> {
 }

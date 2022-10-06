@@ -30,7 +30,7 @@ import java.util.Optional;
  */
 
 @Service
-public class SetMealImpl extends ServiceImpl<ISetmealMapper, Setmeal>implements ISetmealService {
+public class SetmealImpl extends ServiceImpl<ISetmealMapper, Setmeal>implements ISetmealService {
 @Autowired
     private ISetmealDishService dishService;
 @Autowired
@@ -131,6 +131,7 @@ public class SetMealImpl extends ServiceImpl<ISetmealMapper, Setmeal>implements 
         // 更新
         Setmeal update = new Setmeal();
         BeanUtils.copyProperties(setmealDto, update);
+        updateById(update);
         if (CollectionUtils.isNotEmpty(setmealDto.getSetmealDishes())) {
             // 先删除
             LambdaQueryWrapper<SetmealDish> queryWrapper = new LambdaQueryWrapper<>();
