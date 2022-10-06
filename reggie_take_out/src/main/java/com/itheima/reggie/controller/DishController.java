@@ -1,6 +1,7 @@
 package com.itheima.reggie.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.itheima.reggie.common.CustomException;
@@ -16,10 +17,12 @@ import com.itheima.reggie.service.DishService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -39,13 +42,22 @@ public class DishController {
     private CategoryService categoryService;
     @Autowired
     private DishFlavorService dishFlavorService;
+    @Autowired
+    private RedisTemplate<Object,Object> redisTemplate;
 
     /**
      * 新增菜品
      */
     @PostMapping
     public R<String> save(@RequestBody DishDto dishDto) {
-        log.info(dishDto.toString());
+        log.info("前后端联通");
+        //  如果引入了缓存
+        //  那么在对数据库中的数据进行修改或者是新增或者删除的时候，都需要清理下我们的缓存
+        //  清理的话，要用key
+        //  现在是以分类作为key保存的数据，那么这里就要拿到这个分类的id，拼接一个一样的key，来做删除
+       String key =  "dish_" + dishDto.getCategoryId() + "_1";
+       //   清除这个数据
+        this.redisTemplate.delete(key);
         dishService.saveWithFlavor(dishDto);
         return R.success("新增菜品成功");
     }
@@ -136,6 +148,17 @@ public class DishController {
      */
     @PutMapping
     public R<String> update(@RequestBody DishDto dishDto) {
+        log.info("前后端联通");
+        //  更新这里，需要删除掉菜品相关的所有的缓存
+        //  是因为在更新菜品时，可以修改这个菜品的分类
+        //  假设数据在更新之前，dishDto.getCategoryId() = "123"
+        //  数据在更新之后，选择了一个其他的分类 dishDto.getCategoryId() = "321"
+
+        //  String keys = "dish_*" ;
+        //  匹配到所有的dish作为开头的key
+        Set<Object> keys = redisTemplate.keys("dish_*");
+        //  清除掉这个数据
+        this.redisTemplate.delete(keys);
         dishService.updateWithFlavor(dishDto);
         return R.success(GlobalConstant.FINISH);
     }
@@ -194,6 +217,22 @@ public class DishController {
 
     @GetMapping("/list")
     public R<List<DishDto>> list(Dish dish) {
+
+        //  返回的结果
+        List<DishDto> dishDtoList;
+        //  保存到redis中的key
+        //  获取时也要用
+        String key = "dish_" + dish.getCategoryId() + "_" + dish.getStatus();
+        //  根据这个key，到redis中获取相应的数据
+        dishDtoList = (List<DishDto>) this.redisTemplate.opsForValue().get(key);
+        if (CollectionUtils.isNotEmpty(dishDtoList)) {
+            //  如果要是不为空，就代表这个数据已经在redis缓存中了
+            return R.success(dishDtoList);
+        }
+        //  如果在redis中没有查询到，就会返回一个null
+        //  这样的话doshDtoList就是null，所以需要实例化
+        dishDtoList = new ArrayList<>();
+        //  如果dishDtoList是空，就代表在redis缓存中没有查询到数据，那么就要到数据库中查询
         //构造查询条件
         LambdaQueryWrapper<Dish> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(dish.getCategoryId() != null, Dish::getCategoryId, dish.getCategoryId());
@@ -205,7 +244,7 @@ public class DishController {
         List<Dish> list = dishService.list(queryWrapper);
 
         //region foreach写法
-        List<DishDto> dishDtoList = new ArrayList<>();
+        //List<DishDto> dishDtoList = new ArrayList<>();
         for (Dish item : list) {
             DishDto dishDto = new DishDto();
             BeanUtils.copyProperties(item, dishDto);
@@ -225,6 +264,7 @@ public class DishController {
             dishDto.setFlavors(dishFlavorList);
             dishDtoList.add(dishDto);
         }
+        this.redisTemplate.opsForValue().set(key,dishDtoList);
         //endregion
         //region Lambda使用Map方法的写法
         //        List<DishDto> dishDtoList = list.stream().map((item) -> {

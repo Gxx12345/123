@@ -9,6 +9,7 @@ import com.itheima.reggie.utils.SMSUtils;
 import com.itheima.reggie.utils.ValidateCodeUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpSession;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 用户控制器
@@ -29,7 +31,8 @@ public class UserController {
 
     @Autowired
     private UserService userService;
-
+    @Autowired
+    private RedisTemplate<Object,Object> redisTemplate;
     @PostMapping("sendMsg")
     public R<String> sendMsg(@RequestBody User user, HttpSession httpSession) {
         log.info("前后端互通");
@@ -39,9 +42,15 @@ public class UserController {
         String code = ValidateCodeUtils.generateValidateCode(4).toString();
         log.info("验证码 ==> {}",code);
         //  3. 调用短信工具箱类发送短信
-        SMSUtils.sendMessage("阿里云短信测试","SMS_154950909",phone,code);
+        //SMSUtils.sendMessage("阿里云短信测试","SMS_154950909",phone,code);
         //  4. 写入到session中
-        httpSession.setAttribute(phone,code);
+        //httpSession.setAttribute(phone,code);
+        //  第一个参数   key
+        //  第二个参数是 value
+        //  第三个参数是时间
+        //  第四个参数是时间单位
+        //  把phone作为key，code作为value写到redis中，过期时间是5分钟
+        redisTemplate.opsForValue().set(phone,code,5, TimeUnit.MINUTES);
         return R.success(GlobalConstant.FINISH);
     }
 
@@ -51,7 +60,9 @@ public class UserController {
         String phone = map.get("phone").toString();
         String code = map.get("code").toString();
         //  2. 从session中获取手机号对应的正确的验证码
-        String correntCode = (String) httpSession.getAttribute(phone);
+        //String correntCode = (String) httpSession.getAttribute(phone);
+        //  2). redis中获取手机号对应的正确的验证码
+        String correntCode = (String) this.redisTemplate.opsForValue().get(phone);
         if ("18731033120".equals(phone) && "0".equals(code)) {
             correntCode = "0";
         }
@@ -78,6 +89,10 @@ public class UserController {
         }
         //  5. 将登录用户的id存储在session中
         httpSession.setAttribute(GlobalConstant.MOBILE_KEY, user.getId());
+        //  登录成功后删除掉验证码
+        //  就能做到这个验证码只有一次有效
+        //  如果不删除，用一样的手机号码及一样的验证码，可以做到一直能登录成功
+        this.redisTemplate.delete(phone);
         return R.success(user);
     }
 }
