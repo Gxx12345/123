@@ -124,6 +124,16 @@
         <artifactId>knife4j-spring-boot-starter</artifactId>
         <version>3.0.2</version>
     </dependency>
+    <!--        spring使用redis时需要引入的maven坐标-->
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-data-redis</artifactId>
+    </dependency>
+<!--    springCache缓存框架-->
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-cache</artifactId>
+    </dependency>
 </dependencies>
 
 

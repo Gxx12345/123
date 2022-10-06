@@ -12,6 +12,7 @@ import com.itheima.ruji.utils.SMSUtils;
 import com.itheima.ruji.utils.ValidateCodeUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpSession;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  * C端用户信息控制层
@@ -33,7 +35,8 @@ import java.util.Map;
 public class UserController {
     @Autowired
      private IUserService iUserService;
-
+ @Autowired
+ private RedisTemplate <Object,Object>redisTemplate;
     /**
      * 获取验证码
      * @param user
@@ -49,10 +52,17 @@ public class UserController {
         String phone = user.getPhone();
         //生成随机数
         String code = ValidateCodeUtils.generateValidateCode(4).toString();
-        log.info("生成的验证码:{}",code);
-        SMSUtils.sendMessage("阿里云短信测试","SMS_154950909",phone,code);
+       log.info("生成的验证码:{}",code);
+     //   SMSUtils.sendMessage("阿里云短信测试","SMS_154950909",phone,code);
         //写到session中
-        httpSession.setAttribute(phone,code);
+//        httpSession.setAttribute(phone,code);
+
+        // 第一个参数 是key
+        // 第二个参数是 value
+        // 第三个参数是时间
+        // 第四个参数是时间单位
+        // 把phone作为key,code作为value写入到redis中,过期时间是5分钟
+        redisTemplate.opsForValue().set(phone, code, 5, TimeUnit.MINUTES);
        return   R.success(AntPathmathcherSS.FINISH);
     }
 
@@ -68,8 +78,10 @@ public class UserController {
         // 1). 获取前端传递的手机号和验证码
         String phone = map.get("phone").toString();
         String code = map.get("code").toString();
-        // 2). 从Session中获取手机号对应的正确的验证码
-        String currentCode = (String) httpSession.getAttribute(phone);
+       /* // 2). 从Session中获取手机号对应的正确的验证码
+        String currentCode = (String) httpSession.getAttribute(phone);*/
+        // 2). redis中获取手机号对应的正确的验证码
+        String currentCode = (String) this.redisTemplate.opsForValue().get(phone);
         // 为了调试程序
         if ("15661690662".equals(phone) && "0".equals(code)) {
             currentCode = "0";
@@ -98,6 +110,7 @@ public class UserController {
         }
         // 5). 将登录用户的ID存储在Session中
         httpSession.setAttribute(AntPathmathcherSS.C_LOGIN, user.getId());
+        this.redisTemplate.delete(phone);
         return R.success(user);
     }
 }
