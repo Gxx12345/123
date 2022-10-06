@@ -9,10 +9,12 @@ import com.alibaba.reggie.util.ValidateCodeUtils;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpSession;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  * UserController
@@ -25,6 +27,8 @@ import java.util.Map;
 public class UserController {
     @Autowired
     private IUserService userService;
+    @Autowired
+    private RedisTemplate redisTemplate;
 
     @PostMapping("/sendMsg")
     public Result<String> sendMsg(@RequestBody User user, HttpSession httpSession) {
@@ -33,19 +37,23 @@ public class UserController {
         }
         String code = String.valueOf(ValidateCodeUtils.generateValidateCode(4));
         //SMSUtils.sendMessage("阿里云短信测试", "SMS_154950909", user.getPhone(), code);
-        httpSession.setAttribute(GlobalConstant.USER_KEY, code);
+        //httpSession.setAttribute(GlobalConstant.USER_KEY, code);
+
+        //把Phone作为key.code作为value写入到Redis中,过期时间是5分钟
+        redisTemplate.opsForValue().set(user.getPhone(),code,5, TimeUnit.MINUTES);
         return Result.success(GlobalConstant.FINISHED);
     }
 
     @PostMapping("/login")
     public Result<User> login(@RequestBody Map map, HttpSession session) {
         String phone = (String) map.get("phone");
-        /*String code = (String) map.get("code");
 
-        String attribute = (String) session.getAttribute(GlobalConstant.USER_KEY);
+        String code = (String) map.get("code");
+        String attribute =(String) this.redisTemplate.opsForValue().get(phone);
+        //String attribute = (String) session.getAttribute(GlobalConstant.USER_KEY);
         if (StringUtils.isBlank(attribute) || !code.equals(attribute)) {
             return Result.error(GlobalConstant.FAILED);
-        }*/
+        }
         LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(StringUtils.isNotBlank(phone),User::getPhone,phone);
         User user = userService.getOne(queryWrapper);
@@ -60,6 +68,7 @@ public class UserController {
         }
         //设置session值
         session.setAttribute(GlobalConstant.USER_KEY, user.getId());
+        this.redisTemplate.delete(phone);
         return Result.success(user);
     }
 
