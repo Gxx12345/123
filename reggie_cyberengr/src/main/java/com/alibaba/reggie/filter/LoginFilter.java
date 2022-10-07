@@ -32,7 +32,12 @@ public class LoginFilter implements Filter {
                 "/backend/**", "/front/**",
                 "/employee/login", "/employee/logout",
                 "/user/sendMsg", "/user/login",
-                "/common/**"};
+                "/common/**",
+                "/doc.html",
+                "/webjars/**",
+                "/swagger-resources",
+                "/v2/api-docs"
+        };
         for (String uri : uris) {
             //AntPathMatcher路径匹配器对象的match方法比较路径
             if (MATCHER.match(uri, requestURI)) {

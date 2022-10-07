@@ -6,6 +6,10 @@ import com.alibaba.reggie.common.Result;
 import com.alibaba.reggie.service.IEmployeeService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.DigestUtils;
@@ -14,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 
+@Api(tags = "员工控制器")
 @RestController
 @RequestMapping("/employee")
 public class EmployeeController {
@@ -27,6 +32,7 @@ public class EmployeeController {
      * @param request
      * @return
      */
+    @ApiOperation("登录")
     @PostMapping("/login")
     public Result<Employee> login(@RequestBody Employee employeeParam, HttpServletRequest request) {
         //判断用户名和密码是否为空
@@ -101,6 +107,12 @@ public class EmployeeController {
      * @param name     查询的员工名称
      * @return
      */
+    @ApiOperation("分页")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "page",value = "页数",required = true),
+            @ApiImplicitParam(name = "pageSize",value = "分页大小",required = true),
+            @ApiImplicitParam(name = "name",value = "名字关键字",required = false)
+    })
     @GetMapping("/page")
     public Result<Page<Employee>> pageResult(Long page, Long pageSize, String name) {
         if (page == null || pageSize == null) {

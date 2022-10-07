@@ -4,11 +4,14 @@ import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
+@ApiModel("员工实体")
 @Data
 public class Employee implements Serializable {
     @TableField(exist = false)
@@ -16,6 +19,7 @@ public class Employee implements Serializable {
     //@TableId(type = IdType.AUTO)
     private Long id;
     private String name;
+    @ApiModelProperty("用户名")
     private String username;
     private String password;
     private String phone;
