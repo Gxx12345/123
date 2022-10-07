@@ -11,7 +11,9 @@ import com.itheima.reggie.entity.Category;
 import com.itheima.reggie.entity.Setmeal;
 import com.itheima.reggie.service.CategoryService;
 import com.itheima.reggie.service.SetmealService;
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import jdk.nashorn.internal.runtime.GlobalConstants;
 import lombok.extern.slf4j.Slf4j;
@@ -34,6 +36,7 @@ import java.util.Optional;
 @Slf4j
 @RestController
 @RequestMapping("/setmeal")
+@Api(tags = "套餐相关接口")
 public class SetmealController {
 
     @Autowired
@@ -43,6 +46,7 @@ public class SetmealController {
 
     @PostMapping
     @CacheEvict(value = "setmealCache",allEntries = true) //清除setmealCache名称下,所有的缓存数据
+    @ApiOperation(value = "新增套餐接口")
     public R<String> save(@RequestBody SetmealDto dto) {
         log.info("前后端联通");
         //  新增套餐
@@ -55,6 +59,12 @@ public class SetmealController {
      * 套餐查询
      */
     @GetMapping("/page")
+    @ApiOperation(value = "套餐分页查询接口")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "page", value = "页码", required = true),
+            @ApiImplicitParam(name = "pageSize", value = "每页记录数", required = true),
+            @ApiImplicitParam(name = "name", value = "套餐名称", required = false)
+    })
     public R<Page<SetmealDto>> page(Integer page, Integer pageSize, String name) {
         //  1. 构建分页条件对象
         Page<Setmeal> queryPage = new Page<>();
@@ -96,6 +106,7 @@ public class SetmealController {
      */
     @DeleteMapping
     @CacheEvict(value = "setmealCache",allEntries = true) //清除setmealCache名称下,所有的缓存数据
+    @ApiOperation(value = "套餐删除接口")
     public R<String> delete(@RequestParam List<Long> ids) {
         log.info("前后端联通");
         setmealService.deleteByIds(ids);
@@ -121,7 +132,7 @@ public class SetmealController {
      * @return
      */
     @GetMapping("/{id}")
-    @ApiOperation(value = "根据id获取套餐接口")
+    @ApiOperation(value = "套餐条件查询接口")
     @ApiImplicitParam(name = "id", value = "套餐id", required = true)
     public R<SetmealDto> update(@PathVariable Long id) {
         log.info("前后端联通");
