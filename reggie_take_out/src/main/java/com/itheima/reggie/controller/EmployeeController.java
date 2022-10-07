@@ -8,6 +8,10 @@ import com.itheima.reggie.common.GlobalConstant;
 import com.itheima.reggie.common.R;
 import com.itheima.reggie.entity.Employee;
 import com.itheima.reggie.service.IEmployeeService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +22,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 
 
+@Api(tags = "员工控制器")
 @Slf4j
 @RestController
 @RequestMapping("/employee")
@@ -35,6 +40,7 @@ public class EmployeeController {
      * @param employeeParam 前端传来的对象
      * @return
      */
+    @ApiOperation(value = "员工登录")
     @PostMapping("/login")
     public R<Employee> login(@RequestBody Employee employeeParam, HttpServletRequest request) {
 
@@ -74,6 +80,7 @@ public class EmployeeController {
      * @param request Servlet 请求
      * @return
      */
+    @ApiOperation(value = "员工登出")
     @PostMapping("/logout")
     public R<String> logout(HttpServletRequest request) {
         //清理Session中保存的当前登录员工的id
@@ -89,6 +96,7 @@ public class EmployeeController {
      * @param request       Servlet 请求
      * @return
      */
+    @ApiOperation(value = "添加员工")
     @PostMapping
     public R<String> save(@RequestBody Employee employeeParam, HttpServletRequest request) {
         //前后端联通
@@ -129,6 +137,12 @@ public class EmployeeController {
      * @param name     查询条件
      * @return
      */
+    @ApiOperation(value = "员工分页查询")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "page", value = "当前页", required = true),
+            @ApiImplicitParam(name = "pageSize", value = "当前页记录数", required = true),
+            @ApiImplicitParam(name = "name", value = "员工姓名", required = false),
+    })
     @GetMapping("/page")
     public R<Page<Employee>> page(int page, int pageSize, String name) {
         //构造分页构造器
@@ -156,6 +170,7 @@ public class EmployeeController {
      * @param request       Servlet 请求
      * @return
      */
+    @ApiOperation("修改员工信息")
     @PutMapping
     public R<String> update(@RequestBody Employee employeeParam, HttpServletRequest request) {
 
@@ -185,6 +200,8 @@ public class EmployeeController {
      * @param id 前端传来的id
      * @return
      */
+    @ApiOperation("查询员工信息")
+    @ApiImplicitParam(name = "id", value = "员工id", required = true)
     @GetMapping("/{id}")
     public R<Employee> getById(@PathVariable Long id) {
         if (id == null) {
