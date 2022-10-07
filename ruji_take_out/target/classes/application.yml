@@ -1,5 +1,5 @@
 server:
-  port: 8999
+  port: 8998
 spring:
   application:
     name: reggie_take_out
