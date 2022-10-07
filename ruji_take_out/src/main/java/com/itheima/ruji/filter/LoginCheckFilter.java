@@ -41,7 +41,11 @@ public class LoginCheckFilter implements Filter {
                 "/employee/login",
                 "/employee/logout", "/common/**",
                 "/user/sendMsg",
-                "/user/login"
+                "/user/login",
+                "/doc.html",
+                "/webjars/**",
+                "/swagger-resources",
+                "/v2/api-docs"
         };
         for (String uri : uris) {
             boolean match = ANT_PATH_MATCHER.match(uri, currentUri); //前面是我们要匹配的内容,后面是前端传来的内容

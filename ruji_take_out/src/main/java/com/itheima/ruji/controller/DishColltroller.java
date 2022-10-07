@@ -13,6 +13,7 @@ import com.itheima.ruji.entity.DishFlavor;
 import com.itheima.ruji.service.ICategoryService;
 import com.itheima.ruji.service.IDishFlavorService;
 import com.itheima.ruji.service.IDishService;
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
@@ -24,6 +25,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.*;
+import springfox.documentation.annotations.ApiIgnore;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,6 +42,7 @@ import java.util.Set;
 @RestController
 @Slf4j
 @RequestMapping("/dish")
+@Api(tags = "菜品相关接口")
 public class DishColltroller {
     /**
      * 新增菜品
@@ -55,6 +58,8 @@ public class DishColltroller {
     @Autowired
     private RedisTemplate<Object,Object> redisTemplate;
     @PostMapping
+    @ApiOperation(value = "新增菜品")
+    @ApiImplicitParam(name = "dishDto",value = "菜品集合",required = true)
     public R<String> save(@RequestBody DishDto dishDto){
         log.info("前后端联通");
         // 如果引入了缓存
@@ -77,6 +82,12 @@ public class DishColltroller {
      * @return
      */
     @GetMapping("/page")
+    @ApiOperation(value = "菜品分页查询接口")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "page",value = "页码",required = true),
+            @ApiImplicitParam(name = "pageSize",value = "每页记录数",required = true),
+            @ApiImplicitParam(name = "name",value = "套餐名称",required = false)
+    })
     public R<Page<DishDto>>page(Integer page,Integer pageSize,String name){
         // 1. 构造分页条件对象
         Page<Dish> objectPage = new Page<>();
@@ -165,6 +176,8 @@ public class DishColltroller {
      * @return
      */
     @GetMapping("/{id}")
+    @ApiOperation(value = "根据id查询回显")
+    @ApiImplicitParam(name = "id",value = "传入ID",required = true)
     public R<DishDto> catgeoryId(@PathVariable Long id){
         if(id<=0){
             R.error(AntPathmathcherSS.ERROR);
@@ -179,6 +192,8 @@ public class DishColltroller {
      * @return
      */
     @PutMapping
+    @ApiOperation(value = "修改菜品")
+    @ApiImplicitParam(name = "dishDto",value = "修改数据的Dto",required = true)
     public R<String> update(@RequestBody DishDto dishDto) {
         log.info("前后端联通");// controller -> service -> mapper
         // 更新这里,需要删除掉菜品相关的所有的缓存
@@ -222,6 +237,7 @@ public class DishColltroller {
      * @return
      */
     @GetMapping("/list")
+    @ApiOperation(value = "C端查询列表")
     public R<List<DishDto>> list(Dish dish) {
 
 
@@ -231,12 +247,11 @@ public class DishColltroller {
         // 获取时也要用
         String key = "dish_" + dish.getCategoryId() + "_" + dish.getStatus();
         // 根据这个key,到redis中获取相应的数据
-        dishDtoList = (List<DishDto>) this.redisTemplate.opsForValue().get(key);
-        if (CollectionUtils.isNotEmpty(dishDtoList)) {
+       dishDtoList = (List<DishDto>) this.redisTemplate.opsForValue().get(key);
+       if (CollectionUtils.isNotEmpty(dishDtoList)) {
             // 如果要是不为空,就代表这个数据已经在redis缓存中了.
-            return R.success(dishDtoList);
+           return R.success(dishDtoList);
         }
-
         //构造查询条件
         LambdaQueryWrapper<Dish> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(dish.getCategoryId() != null, Dish::getCategoryId, dish.getCategoryId());

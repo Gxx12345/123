@@ -10,6 +10,7 @@ import com.itheima.ruji.entity.User;
 import com.itheima.ruji.service.IUserService;
 import com.itheima.ruji.utils.SMSUtils;
 import com.itheima.ruji.utils.ValidateCodeUtils;
+import io.swagger.annotations.Api;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -32,6 +33,7 @@ import java.util.concurrent.TimeUnit;
 @RestController
 @RequestMapping("/user")
 @Slf4j
+@Api(tags = "用户登录控制层")
 public class UserController {
     @Autowired
      private IUserService iUserService;

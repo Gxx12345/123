@@ -9,6 +9,7 @@ import com.itheima.ruji.common.AntPathmathcherSS;
 import com.itheima.ruji.common.R;
 import com.itheima.ruji.entity.Employee;
 import com.itheima.ruji.service.IEmployeeService;
+import io.swagger.annotations.Api;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +23,7 @@ import java.time.LocalDateTime;
 @Slf4j
 @RestController
 @RequestMapping("/employee")
-
+@Api(tags = "员工后端控制层")
 public class EmployeeController {
 
     @Autowired

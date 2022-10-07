@@ -8,6 +8,7 @@ import com.itheima.ruji.common.R;
 import com.itheima.ruji.entity.AddressBook;
 import com.itheima.ruji.service.IAddressBookService;
 import com.sun.prism.impl.BaseContext;
+import io.swagger.annotations.Api;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -20,6 +21,7 @@ import java.util.List;
 @Slf4j
 @RestController
 @RequestMapping("/addressBook")
+@Api(tags = "地址管理层")
 public class AddressBookController {
 
     @Autowired

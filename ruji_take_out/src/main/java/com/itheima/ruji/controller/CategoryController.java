@@ -6,6 +6,7 @@ import com.itheima.ruji.common.AntPathmathcherSS;
 import com.itheima.ruji.common.R;
 import com.itheima.ruji.entity.Category;
 import com.itheima.ruji.service.ICategoryService;
+import io.swagger.annotations.Api;
 import lombok.extern.java.Log;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
@@ -24,6 +25,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/category")
 @Slf4j
+@Api(tags = "分类控制层")
 public class CategoryController {
     @Autowired
     private ICategoryService categoryService;

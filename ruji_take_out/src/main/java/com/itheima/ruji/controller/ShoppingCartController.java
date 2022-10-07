@@ -8,6 +8,7 @@ import com.itheima.ruji.common.CustomException;
 import com.itheima.ruji.common.R;
 import com.itheima.ruji.entity.ShoppingCart;
 import com.itheima.ruji.service.IShoppingCartService;
+import io.swagger.annotations.Api;
 import lombok.extern.java.Log;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
@@ -28,6 +29,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/shoppingCart")
 @Slf4j
+@Api(tags = "购物车")
 public class ShoppingCartController {
 
     @Autowired

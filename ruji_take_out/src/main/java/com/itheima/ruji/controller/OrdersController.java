@@ -12,6 +12,7 @@ import com.itheima.ruji.entity.ShoppingCart;
 import com.itheima.ruji.entity.User;
 import com.itheima.ruji.service.IOrdersService;
 import com.itheima.ruji.service.IUserService;
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
@@ -35,6 +36,7 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/order")
 @Slf4j
+@Api(tags = "订单控制层")
 public class OrdersController {
     @Autowired
     private IOrdersService iOrdersService;

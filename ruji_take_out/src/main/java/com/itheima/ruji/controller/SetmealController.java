@@ -14,6 +14,7 @@ import com.itheima.ruji.entity.Setmeal;
 import com.itheima.ruji.service.ICategoryService;
 import com.itheima.ruji.service.ISetmealDishService;
 import com.itheima.ruji.service.ISetmealService;
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
@@ -25,6 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.web.bind.annotation.*;
+import springfox.documentation.annotations.ApiIgnore;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,6 +43,7 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/setmeal")
 @Slf4j
+@Api(tags = "套餐相关接口")
 public class SetmealController {
     @Autowired
     private ISetmealService iSetmealService;
@@ -56,6 +59,7 @@ public class SetmealController {
      */
     @PostMapping
     @CacheEvict(value = "setmealCache",allEntries = true) //清除setmealCache名称下,所有的缓存数据
+    @ApiOperation(value = "新增套餐接口")
     public R<String> insertSetmeal(@RequestBody SetmealDto dto) {
         log.info("前后联通{}", dto);
         //在service中扩展方法
@@ -71,6 +75,12 @@ public class SetmealController {
      * @return
      */
     @GetMapping("/page")
+    @ApiOperation(value = "套餐分页查询接口")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "page",value = "页码",required = true),
+            @ApiImplicitParam(name = "pageSize",value = "每页记录数",required = true),
+            @ApiImplicitParam(name = "name",value = "套餐名称",required = false)
+    })
     public R<Page<SetmealDto>> pageSetmeal(Integer page, Integer pageSize, String name) {
         //构造分页条件
         Page<Setmeal> Page = new Page<>();
@@ -162,6 +172,7 @@ public class SetmealController {
      */
     @GetMapping("/list")
     @Cacheable(value = "setmealCache",key = "#setmeal.categoryId + '_' + #setmeal.status")
+    @ApiOperation(value = "C端根据条件查询套餐数据")
     public R<List<Setmeal>> list( Setmeal setmeal){
         LambdaQueryWrapper<Setmeal> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(setmeal.getCategoryId() != null,Setmeal::getCategoryId,setmeal.getCategoryId());
@@ -230,6 +241,7 @@ public class SetmealController {
      */
     @GetMapping("/{id}")
     @ApiOperation(value = "根据id获取套餐接口")
+    @ApiImplicitParam(name = "id",value = "传入id",required = true)
     public R<SetmealDto>setmealId(@PathVariable Long id){
         log.info("前后联通{}",id);
         Optional.ofNullable(id)

@@ -111,7 +111,11 @@
         <artifactId>druid-spring-boot-starter</artifactId>
         <version>1.1.23</version>
     </dependency>
-
+    <dependency>
+        <groupId>com.github.xiaoymin</groupId>
+        <artifactId>knife4j-spring-boot-starter</artifactId>
+        <version>3.0.2</version>
+    </dependency>
     <!-- Dozer -->
     <dependency>
         <groupId>com.github.dozermapper</groupId>
@@ -134,11 +138,12 @@
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-cache</artifactId>
     </dependency>
-</dependencies>
+    <!--   使用knife4j 接口框架坐标-->
+  </dependencies>
 
 
 
-    <!-- springBoot 打成jar包,之后使用 -jar运行时的依赖-->
+      <!-- springBoot 打成jar包,之后使用 -jar运行时的依赖-->
 
     <build>
         <plugins>

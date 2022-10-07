@@ -1,6 +1,7 @@
 package com.itheima.ruji.controller;
 
 import com.itheima.ruji.common.R;
+import io.swagger.annotations.Api;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -27,6 +28,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/common")
 @Slf4j
+@Api(tags = "上传文件/图片")
 public class CommomColltroller {
     //在配置文件中取值
     //第一种:@value
