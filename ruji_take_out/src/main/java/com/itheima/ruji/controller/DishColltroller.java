@@ -59,7 +59,6 @@ public class DishColltroller {
     private RedisTemplate<Object,Object> redisTemplate;
     @PostMapping
     @ApiOperation(value = "新增菜品")
-    @ApiImplicitParam(name = "dishDto",value = "菜品集合",required = true)
     public R<String> save(@RequestBody DishDto dishDto){
         log.info("前后端联通");
         // 如果引入了缓存
