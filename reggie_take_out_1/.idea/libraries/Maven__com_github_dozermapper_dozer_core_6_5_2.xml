@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Maven: com.github.dozermapper:dozer-core:6.5.2">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/../../../../../apache-maven-3.6.1-bin/apache-maven-3.6.1/mvn_repo/com/github/dozermapper/dozer-core/6.5.2/dozer-core-6.5.2.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$PROJECT_DIR$/../../../../../apache-maven-3.6.1-bin/apache-maven-3.6.1/mvn_repo/com/github/dozermapper/dozer-core/6.5.2/dozer-core-6.5.2-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$PROJECT_DIR$/../../../../../apache-maven-3.6.1-bin/apache-maven-3.6.1/mvn_repo/com/github/dozermapper/dozer-core/6.5.2/dozer-core-6.5.2-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>
