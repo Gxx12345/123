@@ -1,0 +1,81 @@
+server:
+  port: 8999
+spring:
+#  main:
+#    allow-bean-definition-overriding: true
+#  shardingsphere:
+#    datasource:
+#      names:
+#        master,slver
+#      # 主数据源
+#      master:
+#        type: com.alibaba.druid.pool.DruidDataSource
+#        driver-class-name: com.mysql.cj.jdbc.Driver
+#        url: jdbc:mysql://192.168.200.129:3306/masterzhu?characterEncoding=utf-8
+#        username: root
+#        password: root
+#      # 从数据源
+#      slver:
+#        type: com.alibaba.druid.pool.DruidDataSource
+#        driver-class-name: com.mysql.cj.jdbc.Driver
+#        url: jdbc:mysql://192.168.200.131:3306/masterzhu?characterEncoding=utf-8
+#        username: root
+#        password: root
+#    masterslave:
+#      # 读写分离配置
+#      load-balance-algorithm-type: round_robin #轮询
+#      # 最终的数据源名称
+#      name: dataSource
+#      # 主库数据源名称
+#      master-data-source-name: master
+#      # 从库数据源名称列表，多个逗号分隔
+#      slave-data-source-names: slver
+#    props:
+#      sql:
+#        show: true #开启SQL显示，默认false
+
+
+  application:
+    name: reggie_take_out
+  datasource:
+    druid:
+    # 应为连接池用的德鲁伊 ,所以这个地址就加cj
+      driver-class-name: com.mysql.cj.jdbc.Driver
+      #数据库连接地址  localhost=127.0.0.1 本机
+      url: jdbc:mysql://192.168.200.129:3306/reggie?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowPublicKeyRetrieval=true
+      username: root
+      password: root
+  redis:
+    # 连接地址
+    host: 127.0.0.1
+    # 密码 有密码的话,需要输入密码
+    # password:
+    # 端口号
+    port: 6379
+    # redis使用的是哪个数据库
+    database: 2
+  cache:
+      redis:
+        time-to-live: 1800000   #设置缓存过期时间，可选
+
+mybatis-plus:
+  configuration:
+    #在映射实体或者属性时，将数据库中表名和字段名中的下划线去掉，按照驼峰命名法映射
+   # 开启驼峰: id_no -> idNO
+    map-underscore-to-camel-case: true
+    # 日志输出
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    #全员配置
+  global-config:
+    db-config:
+      # id的生成规则
+      id-type: ASSIGN_ID
+
+
+reggie:
+  path: E:\images
+
+# 这是将日志中的条件转换成sql语句
+#logging:
+#  level:
+ #   com.itheima.reggie.mapper:debug
